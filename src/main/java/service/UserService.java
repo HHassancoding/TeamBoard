@@ -1,4 +1,4 @@
-package Interfaces;
+package service;
 
 import entity.User;
 import java.util.List;

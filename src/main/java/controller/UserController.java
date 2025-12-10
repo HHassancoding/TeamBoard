@@ -1,6 +1,6 @@
 package controller;
 
-import Interfaces.UserService;
+import service.UserService;
 import entity.User;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
