@@ -42,7 +42,7 @@ public class UserImp implements UserService {
 
   @Override
   public void deleteUser(Long id) {
-    userRepo.findById(id);
+    userRepo.deleteById(id);
 
 
   }
