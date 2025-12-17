@@ -53,5 +53,9 @@ public class UserImp implements UserService {
     return userRepo.save(user);
   }
 
+  public User findByEmail(String email){
+    return userRepo.findByEmail(email).orElse(null);
+  }
+
 
 }
