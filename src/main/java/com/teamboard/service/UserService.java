@@ -1,6 +1,6 @@
-package service;
+package com.teamboard.service;
 
-import entity.User;
+import com.teamboard.entity.User;
 import java.util.List;
 
 public interface UserService {

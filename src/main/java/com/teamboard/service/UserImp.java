@@ -1,11 +1,11 @@
-package service;
+package com.teamboard.service;
 
-import entity.User;
+import com.teamboard.entity.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import repository.UserRepo;
+import com.teamboard.repository.UserRepo;
 @Service
 public class UserImp implements UserService {
   private final UserRepo userRepo;
@@ -43,7 +43,6 @@ public class UserImp implements UserService {
   @Override
   public void deleteUser(Long id) {
     userRepo.deleteById(id);
-
 
   }
 

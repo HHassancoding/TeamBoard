@@ -1,4 +1,4 @@
-package DTO;
+package com.teamboard.DTO;
 
 
 import lombok.AllArgsConstructor;

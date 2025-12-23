@@ -1,4 +1,4 @@
-package util;
+package com.teamboard.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,7 +14,7 @@ public class JwtUtil {
   private String secret;
 
   @Value("${jwt.expiration}")
-  private String jtwExpiration;
+  private long jwtExpiration;
 
   @Value("${jwt.refreshTokenExpiration}")
   private long refreshTokenExpiration;
@@ -27,7 +27,7 @@ public class JwtUtil {
     return Jwts.builder()
         .setSubject(username)
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + jtwExpiration))
+        .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
         .signWith(getSigningKey(), SignatureAlgorithm.HS256)
         .compact();
   }

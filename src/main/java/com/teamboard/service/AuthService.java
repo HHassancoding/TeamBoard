@@ -1,15 +1,15 @@
-package service;
+package com.teamboard.service;
 
-import DTO.AuthRequest;
-import DTO.AuthResponse;
+import com.teamboard.DTO.AuthRequest;
+import com.teamboard.DTO.AuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import repository.UserRepo;
-import util.JwtUtil;
+import com.teamboard.repository.UserRepo;
+import com.teamboard.util.JwtUtil;
 
 @Service
 public class AuthService {

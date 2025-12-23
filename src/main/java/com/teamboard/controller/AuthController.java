@@ -1,8 +1,8 @@
-package controller;
+package com.teamboard.controller;
 
-import DTO.AuthRequest;
-import DTO.AuthResponse;
-import entity.User;
+import com.teamboard.DTO.AuthRequest;
+import com.teamboard.DTO.AuthResponse;
+import com.teamboard.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import service.AuthService;
-import service.UserImp;
-import util.JwtUtil;
+import com.teamboard.service.AuthService;
+import com.teamboard.service.UserImp;
+import com.teamboard.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,7 +39,7 @@ public class AuthController {
       userImp.createUser(user);
       return ResponseEntity.ok("User created successfully");
     }catch(Exception e){
-      return ResponseEntity.badRequest().body("Registration failed");
+      return ResponseEntity.badRequest().body("Registration failed" + e.getMessage() + " ");
     }
   }
 

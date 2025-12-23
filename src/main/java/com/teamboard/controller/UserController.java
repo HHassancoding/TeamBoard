@@ -1,8 +1,8 @@
-package controller;
+package com.teamboard.controller;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
-import service.UserService;
-import entity.User;
+import com.teamboard.service.UserService;
+import com.teamboard.entity.User;
 import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
