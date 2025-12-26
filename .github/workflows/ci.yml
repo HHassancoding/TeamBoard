@@ -16,6 +16,7 @@ jobs:
           POSTGRES_DB: teamboard
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres123
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} 
         ports:
           - 5432:5432
         options: >-
