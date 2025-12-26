@@ -89,8 +89,6 @@ public class AuthServiceTests {
     verify(jwtUtil).generateToken(authRequest.getEmail());
 
 
-
-
   }
 
 }
