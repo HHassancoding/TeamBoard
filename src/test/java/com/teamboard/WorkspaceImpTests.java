@@ -4,6 +4,7 @@ import com.teamboard.entity.User;
 import com.teamboard.entity.Workspace;
 import com.teamboard.repository.WorkspaceRepository;
 import com.teamboard.service.WorkspaceImp;
+import com.teamboard.service.WorkspaceMemberService;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,6 +29,9 @@ public class WorkspaceImpTests {
 
   @Mock
   private WorkspaceRepository workspaceRepository;
+
+  @Mock
+  private ObjectProvider<WorkspaceMemberService> workspaceMemberServiceProvider;
 
   @InjectMocks
   private WorkspaceImp workspaceImp;
@@ -152,6 +157,9 @@ public class WorkspaceImpTests {
     savedWorkspace.setUpdatedAt(LocalDateTime.now());
 
     when(workspaceRepository.save(newWorkspace)).thenReturn(savedWorkspace);
+    // Mock the ObjectProvider to return a WorkspaceMemberService that does nothing
+    WorkspaceMemberService mockMemberService = mock(WorkspaceMemberService.class);
+    when(workspaceMemberServiceProvider.getObject()).thenReturn(mockMemberService);
 
     // Act
     Workspace result = workspaceImp.createWorkspace(newWorkspace);

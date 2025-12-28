@@ -1,10 +1,15 @@
 package com.teamboard.controller;
 
 import com.teamboard.DTO.WorkspaceCreateRequestDTO;
+import com.teamboard.DTO.WorkspaceMemberRequestDTO;
+import com.teamboard.DTO.WorkspaceMemberResponseDTO;
 import com.teamboard.DTO.WorkspaceResponseDTO;
+import com.teamboard.entity.MemberRole;
 import com.teamboard.entity.User;
 import com.teamboard.entity.Workspace;
+import com.teamboard.entity.WorkspaceMember;
 import com.teamboard.service.WorkspaceService;
+import com.teamboard.service.WorkspaceMemberService;
 import com.teamboard.service.UserImp;
 import com.teamboard.util.JwtUtil;
 import java.util.List;
@@ -27,11 +32,17 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*")
 public class WorkspaceController {
   private final WorkspaceService workspaceService;
+  private final WorkspaceMemberService workspaceMemberService;
   private final JwtUtil jwtUtil;
   private final UserImp userImp;
 
-  public WorkspaceController(WorkspaceService workspaceService, JwtUtil jwtUtil, UserImp userImp) {
+  public WorkspaceController(
+      WorkspaceService workspaceService,
+      WorkspaceMemberService workspaceMemberService,
+      JwtUtil jwtUtil,
+      UserImp userImp) {
     this.workspaceService = workspaceService;
+    this.workspaceMemberService = workspaceMemberService;
     this.jwtUtil = jwtUtil;
     this.userImp = userImp;
   }
@@ -224,6 +235,137 @@ public class WorkspaceController {
   }
 
   /**
+   * Add a member to workspace.
+   * POST /api/workspaces/{id}/members
+   */
+  @PostMapping("/{id}/members")
+  public ResponseEntity<?> addMemberToWorkspace(
+      @PathVariable Long id,
+      @RequestHeader("Authorization") String bearerToken,
+      @RequestBody WorkspaceMemberRequestDTO requestDTO) {
+    try {
+      // Extract JWT token and resolve current user
+      String token = bearerToken.substring(7);
+      String email = jwtUtil.extractUsername(token);
+      User currentUser = userImp.findByEmail(email);
+
+      if (currentUser == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+      }
+
+      // Get workspace
+      Workspace workspace = workspaceService.getWorkspace(id);
+      if (workspace == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
+      }
+
+      // Check if current user is owner
+      if (!workspace.getOwner().getId().equals(currentUser.getId())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body("Only workspace owner can add members");
+      }
+
+      // Validate request
+      if (requestDTO.getUserId() == null) {
+        return ResponseEntity.badRequest().body("User ID is required");
+      }
+
+      // Determine role
+      MemberRole role = MemberRole.MEMBER;
+      if (requestDTO.getRole() != null && !requestDTO.getRole().trim().isEmpty()) {
+        try {
+          role = MemberRole.valueOf(requestDTO.getRole().toUpperCase());
+        } catch (IllegalArgumentException e) {
+          return ResponseEntity.badRequest()
+              .body("Invalid role. Must be one of: ADMIN, MEMBER, VIEWER");
+        }
+      }
+
+      // Add member
+      WorkspaceMember member =
+          workspaceMemberService.addMember(requestDTO.getUserId(), id, role);
+      WorkspaceMemberResponseDTO responseDTO = convertToMemberResponseDTO(member);
+
+      return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to add member: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Remove a member from workspace.
+   * DELETE /api/workspaces/{id}/members/{userId}
+   */
+  @DeleteMapping("/{id}/members/{userId}")
+  public ResponseEntity<?> removeMemberFromWorkspace(
+      @PathVariable Long id,
+      @PathVariable Long userId,
+      @RequestHeader("Authorization") String bearerToken) {
+    try {
+      // Extract JWT token and resolve current user
+      String token = bearerToken.substring(7);
+      String email = jwtUtil.extractUsername(token);
+      User currentUser = userImp.findByEmail(email);
+
+      if (currentUser == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+      }
+
+      // Get workspace
+      Workspace workspace = workspaceService.getWorkspace(id);
+      if (workspace == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
+      }
+
+      // Check if current user is owner
+      if (!workspace.getOwner().getId().equals(currentUser.getId())) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body("Only workspace owner can remove members");
+      }
+
+      // Remove member
+      workspaceMemberService.removeMember(userId, id);
+
+      return ResponseEntity.noContent().build();
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to remove member: " + e.getMessage());
+    }
+  }
+
+  /**
+   * List all members of a workspace.
+   * GET /api/workspaces/{id}/members
+   */
+  @GetMapping("/{id}/members")
+  public ResponseEntity<?> getWorkspaceMembers(@PathVariable Long id) {
+    try {
+      // Validate workspace exists
+      Workspace workspace = workspaceService.getWorkspace(id);
+      if (workspace == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
+      }
+
+      // Get members
+      List<WorkspaceMember> members = workspaceMemberService.getMembersOfWorkspace(id);
+      List<WorkspaceMemberResponseDTO> responseDTOs =
+          members.stream()
+              .map(this::convertToMemberResponseDTO)
+              .collect(Collectors.toList());
+
+      return ResponseEntity.ok(responseDTOs);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch members: " + e.getMessage());
+    }
+  }
+
+  /**
    * Helper method to convert Workspace entity to WorkspaceResponseDTO.
    */
   private WorkspaceResponseDTO convertToResponseDTO(Workspace workspace) {
@@ -236,6 +378,21 @@ public class WorkspaceController {
     dto.setOwnerEmail(workspace.getOwner().getEmail());
     dto.setCreatedAt(workspace.getCreatedAt());
     dto.setUpdatedAt(workspace.getUpdatedAt());
+    return dto;
+  }
+
+  /**
+   * Helper method to convert WorkspaceMember entity to WorkspaceMemberResponseDTO.
+   */
+  private WorkspaceMemberResponseDTO convertToMemberResponseDTO(WorkspaceMember member) {
+    WorkspaceMemberResponseDTO dto = new WorkspaceMemberResponseDTO();
+    dto.setId(member.getId());
+    dto.setUserId(member.getUser().getId());
+    dto.setUserEmail(member.getUser().getEmail());
+    dto.setUserName(member.getUser().getName());
+    dto.setRole(member.getRole().name());
+    dto.setJoinedAt(member.getJoinedAt());
+    dto.setUpdatedAt(member.getUpdatedAt());
     return dto;
   }
 }

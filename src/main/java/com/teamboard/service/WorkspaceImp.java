@@ -1,17 +1,23 @@
 package com.teamboard.service;
 
 import com.teamboard.entity.Workspace;
+import com.teamboard.entity.MemberRole;
 import com.teamboard.repository.WorkspaceRepository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceImp implements WorkspaceService {
   private final WorkspaceRepository workspaceRepository;
+  private final ObjectProvider<WorkspaceMemberService> workspaceMemberServiceProvider;
 
-  public WorkspaceImp(WorkspaceRepository workspaceRepository) {
+  public WorkspaceImp(
+      WorkspaceRepository workspaceRepository,
+      ObjectProvider<WorkspaceMemberService> workspaceMemberServiceProvider) {
     this.workspaceRepository = workspaceRepository;
+    this.workspaceMemberServiceProvider = workspaceMemberServiceProvider;
   }
 
   @Override
@@ -26,7 +32,20 @@ public class WorkspaceImp implements WorkspaceService {
 
   @Override
   public Workspace createWorkspace(Workspace workspace) {
-    return workspaceRepository.save(workspace);
+    Workspace savedWorkspace = workspaceRepository.save(workspace);
+
+    // Auto-add owner as ADMIN member
+    try {
+      WorkspaceMemberService memberService = workspaceMemberServiceProvider.getObject();
+      memberService.addMember(
+          workspace.getOwner().getId(),
+          savedWorkspace.getId(),
+          MemberRole.ADMIN);
+    } catch (IllegalArgumentException e) {
+      // Member already exists, continue
+    }
+
+    return savedWorkspace;
   }
 
   @Override
