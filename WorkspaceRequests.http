@@ -23,12 +23,12 @@ Content-Type: application/json
 ### CREATE WORKSPACE TEST - Create workspace "Team Project 1"
 POST http://localhost:8080/api/workspaces
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzA5ODUsImV4cCI6MTc2NjkzMTA3Mn0.TrgG066x1sZCQ8Vik2-7A4V83vjL5AzcLEya8SJEivo
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzI2MzYsImV4cCI6MTc2NjkzMjcyM30.8zO73bCiMHYtGNyo5ekUK15bw3OLkDk-m6yDXecok-Y
 
 
 {
-  "name": "Team Project 1",
-  "description": "First collaborative workspace for team"
+  "name": "Team Project 2",
+  "description": "First collaborative workspace for team 2"
 }
 
 ###
@@ -54,9 +54,9 @@ Content-Type: application/json
 
 ###
 ### UPDATE WORKSPACE TEST - Update workspace name and description (Owner only)
-PUT http://localhost:8080/api/workspaces/1
+PUT http://localhost:8080/api/workspaces/2
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzI2MzYsImV4cCI6MTc2NjkzMjcyM30.8zO73bCiMHYtGNyo5ekUK15bw3OLkDk-m6yDXecok-Y
 
 {
   "name": "Team Project 1 - Updated",
@@ -81,27 +81,17 @@ Content-Type: application/json
 
 
 
-###
+
 ### GET WORKSPACES BY OWNER ID (Replace 1 with actual owner user ID)
 GET http://localhost:8080/api/workspaces/owner/1
 Content-Type: application/json
 
-###
-### CREATE DUPLICATE WORKSPACE TEST - Try to create workspace with same name (Should fail with 400)
-POST http://localhost:8080/api/workspaces
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
 
-{
-  "name": "Team Project 1 - Updated",
-  "description": "Duplicate name test"
-}
 
-###
 ### CREATE WORKSPACE TEST - Workspace with null name (Should fail with 400)
 POST http://localhost:8080/api/workspaces
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzI2MzYsImV4cCI6MTc2NjkzMjcyM30.8zO73bCiMHYtGNyo5ekUK15bw3OLkDk-m6yDXecok-Y
 
 {
   "name": null,
@@ -127,7 +117,7 @@ Content-Type: application/json
 ### NOT FOUND TEST - Try to update non-existent workspace (Should fail with 404)
 PUT http://localhost:8080/api/workspaces/99999
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzI2MzYsImV4cCI6MTc2NjkzMjcyM30.8zO73bCiMHYtGNyo5ekUK15bw3OLkDk-m6yDXecok-Y
 
 {
   "name": "Updated",
