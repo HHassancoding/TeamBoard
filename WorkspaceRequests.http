@@ -1,0 +1,142 @@
+### Register Test User
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "workspace_test@gmail.com",
+  "passwordHash": "testpass123",
+  "name": "Workspace Tester",
+  "avatarInitials": "WT"
+}
+
+###
+### Login Test User (Get JWT Token)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "workspace_test@gmail.com",
+  "password": "testpass123"
+}
+
+###
+### CREATE WORKSPACE TEST - Create workspace "Team Project 1"
+POST http://localhost:8080/api/workspaces
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzA5ODUsImV4cCI6MTc2NjkzMTA3Mn0.TrgG066x1sZCQ8Vik2-7A4V83vjL5AzcLEya8SJEivo
+
+
+{
+  "name": "Team Project 1",
+  "description": "First collaborative workspace for team"
+}
+
+###
+### CREATE WORKSPACE TEST - Create workspace "Design System"
+POST http://localhost:8080/api/workspaces
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzA5ODUsImV4cCI6MTc2NjkzMTA3Mn0.TrgG066x1sZCQ8Vik2-7A4V83vjL5AzcLEya8SJEivo
+
+{
+  "name": "Design System",
+  "description": "Shared design components and guidelines"
+}
+
+###
+### GET ALL WORKSPACES
+GET http://localhost:8080/api/workspaces
+Content-Type: application/json
+
+###
+### GET WORKSPACE BY ID (Replace 1 with actual workspace ID from create response)
+GET http://localhost:8080/api/workspaces/1
+Content-Type: application/json
+
+###
+### UPDATE WORKSPACE TEST - Update workspace name and description (Owner only)
+PUT http://localhost:8080/api/workspaces/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+
+{
+  "name": "Team Project 1 - Updated",
+  "description": "Updated description for the workspace"
+}
+
+###
+### UPDATE WORKSPACE TEST - Try to update with empty name (Should fail with 400)
+PUT http://localhost:8080/api/workspaces/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzA5ODUsImV4cCI6MTc2NjkzMTA3Mn0.TrgG066x1sZCQ8Vik2-7A4V83vjL5AzcLEya8SJEivo
+
+{
+  "name": "",
+  "description": "This should fail"
+}
+
+###
+### DELETE WORKSPACE TEST - Delete workspace by ID (Owner only)
+DELETE http://localhost:8080/api/workspaces/1
+Content-Type: application/json
+
+
+
+###
+### GET WORKSPACES BY OWNER ID (Replace 1 with actual owner user ID)
+GET http://localhost:8080/api/workspaces/owner/1
+Content-Type: application/json
+
+###
+### CREATE DUPLICATE WORKSPACE TEST - Try to create workspace with same name (Should fail with 400)
+POST http://localhost:8080/api/workspaces
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+
+{
+  "name": "Team Project 1 - Updated",
+  "description": "Duplicate name test"
+}
+
+###
+### CREATE WORKSPACE TEST - Workspace with null name (Should fail with 400)
+POST http://localhost:8080/api/workspaces
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+
+{
+  "name": null,
+  "description": "This should fail"
+}
+
+###
+### UNAUTHORIZED TEST - Try to create workspace without Authorization header (Should fail with 401)
+POST http://localhost:8080/api/workspaces
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Workspace",
+  "description": "This should fail"
+}
+
+###
+### NOT FOUND TEST - Try to get non-existent workspace (Should fail with 404)
+GET http://localhost:8080/api/workspaces/99999
+Content-Type: application/json
+
+###
+### NOT FOUND TEST - Try to update non-existent workspace (Should fail with 404)
+PUT http://localhost:8080/api/workspaces/99999
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+
+{
+  "name": "Updated",
+  "description": "Non-existent workspace"
+}
+
+###
+### NOT FOUND TEST - Try to delete non-existent workspace (Should fail with 404)
+DELETE http://localhost:8080/api/workspaces/99999
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NzAzODI0MDAsImV4cCI6MTc3MDk4NzIwMH0.mock_token_replace_with_actual
+
