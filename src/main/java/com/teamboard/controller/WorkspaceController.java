@@ -8,9 +8,9 @@ import com.teamboard.entity.MemberRole;
 import com.teamboard.entity.User;
 import com.teamboard.entity.Workspace;
 import com.teamboard.entity.WorkspaceMember;
+import com.teamboard.service.UserService;
 import com.teamboard.service.WorkspaceService;
 import com.teamboard.service.WorkspaceMemberService;
-import com.teamboard.service.UserImp;
 import com.teamboard.util.JwtUtil;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,13 +34,13 @@ public class WorkspaceController {
   private final WorkspaceService workspaceService;
   private final WorkspaceMemberService workspaceMemberService;
   private final JwtUtil jwtUtil;
-  private final UserImp userImp;
+  private final UserService userImp;
 
   public WorkspaceController(
       WorkspaceService workspaceService,
       WorkspaceMemberService workspaceMemberService,
       JwtUtil jwtUtil,
-      UserImp userImp) {
+      UserService userImp) {
     this.workspaceService = workspaceService;
     this.workspaceMemberService = workspaceMemberService;
     this.jwtUtil = jwtUtil;

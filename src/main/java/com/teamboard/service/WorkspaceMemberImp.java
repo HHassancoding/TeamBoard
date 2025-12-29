@@ -8,6 +8,7 @@ import com.teamboard.repository.WorkspaceMemberRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WorkspaceMemberImp implements WorkspaceMemberService {
@@ -25,6 +26,7 @@ public class WorkspaceMemberImp implements WorkspaceMemberService {
   }
 
   @Override
+  @Transactional
   public WorkspaceMember addMember(Long userId, Long workspaceId, MemberRole role) {
     // Validate user exists
     User user = userService.getUser(userId);
