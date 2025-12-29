@@ -9,6 +9,5 @@ public interface UserService {
   User updateUser(User user);
   void deleteUser(Long id);
   User createUser(User user);
-
-
+  User findByEmail(String email);
 }

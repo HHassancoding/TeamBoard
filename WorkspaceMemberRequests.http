@@ -1,0 +1,303 @@
+### WorkspaceMember API Test Requests
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2NzAwNjA4NiwiZXhwIjoxNzY3MDA2MTcyfQ.Hui7qVNkkUcAXJz46y4dAiW3LC-z5GXXMyA0-GLzvmY
+
+### NOTE: ID MAPPING FOR TESTING
+### After registering users, note their IDs:
+### - ownerUserId: ID of the owner (who creates workspace)
+### - memberUserId: ID of user to add as member
+### - workspaceId: ID of the workspace
+### Update the requests below with the actual IDs from your database
+
+###
+### ============ USER REGISTRATION ============
+###
+
+### Register Owner User (will create workspace)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "owner@test.com",
+  "passwordHash": "password123",
+  "name": "Owner User",
+  "avatarInitials": "OU"
+}
+
+### NOTE: Copy the returned ID and use as ownerUserId
+
+
+###
+### Register Member 1 (will be added to workspace)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "member1@test.com",
+  "passwordHash": "password123",
+  "name": "Member One",
+  "avatarInitials": "M1"
+}
+
+### NOTE: Copy the returned ID and use as memberUserId in add member requests
+
+
+###
+### Register Member 2 (will be added to workspace with ADMIN role)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "member2@test.com",
+  "passwordHash": "password123",
+  "name": "Member Two",
+  "avatarInitials": "M2"
+}
+
+### NOTE: Copy the returned ID
+
+
+###
+### Register Member 3 (will be added to workspace with VIEWER role)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "member3@test.com",
+  "passwordHash": "password123",
+  "name": "Member Three",
+  "avatarInitials": "M3"
+}
+
+### NOTE: Copy the returned ID
+
+
+###
+### ============ AUTHENTICATION ============
+###
+
+### Login as Owner
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner@test.com",
+  "password": "password123"
+}
+
+### NOTE: Copy the returned token to @token variable
+
+
+###
+### ============ WORKSPACE CREATION ============
+###
+
+### Create Workspace (owner becomes ADMIN automatically)
+POST {{baseUrl}}/workspaces
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Test Workspace",
+  "description": "A workspace for testing member management"
+}
+
+### NOTE: Copy the returned workspaceId and use in member management requests
+
+
+###
+### Get all workspaces
+GET {{baseUrl}}/workspaces
+Authorization: Bearer {{token}}
+
+###
+### Get single workspace by workspaceId
+### Path: /workspaces/{workspaceId}
+GET {{baseUrl}}/workspaces/1
+Authorization: Bearer {{token}}
+
+###
+### ============ WORKSPACE MEMBER MANAGEMENT ============
+###
+
+### Add Member 1 with MEMBER role
+### Path: POST /workspaces/{workspaceId}/members
+### Body: { "userId": <memberUserId>, "role": "MEMBER" }
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 2,
+  "role": "MEMBER"
+}
+
+### Notes:
+### - workspaceId=1 (the workspace to add member to)
+### - userId=2 (the user to add as member)
+
+
+###
+### Add Member 2 with ADMIN role
+### Path: POST /workspaces/{workspaceId}/members
+### Body: { "userId": <memberUserId>, "role": "ADMIN" }
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 3,
+  "role": "ADMIN"
+}
+
+### Notes:
+### - workspaceId=1 (the workspace to add member to)
+### - userId=3 (the user to add as admin)
+
+
+###
+### Add Member 3 with VIEWER role
+### Path: POST /workspaces/{workspaceId}/members
+### Body: { "userId": <memberUserId>, "role": "VIEWER" }
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 4,
+  "role": "VIEWER"
+}
+
+### Notes:
+### - workspaceId=1 (the workspace to add member to)
+### - userId=4 (the user to add as viewer)
+
+###
+### List all members of workspace
+### Path: GET /workspaces/{workspaceId}/members
+GET {{baseUrl}}/workspaces/1/members
+Authorization: Bearer {{token}}
+
+### Notes:
+### - workspaceId=1 (the workspace to get members from)
+
+
+###
+### Remove member from workspace
+### Path: DELETE /workspaces/{workspaceId}/members/{userId}
+DELETE {{baseUrl}}/workspaces/1/members/2
+Authorization: Bearer {{token}}
+
+### Notes:
+### - workspaceId=1 (the workspace to remove member from)
+### - userId=2 (the user to remove from the workspace)
+
+
+###
+### Remove another member from workspace
+DELETE {{baseUrl}}/workspaces/1/members/3
+Authorization: Bearer {{token}}
+
+### Notes:
+### - workspaceId=1
+### - userId=3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###
+### Try to add duplicate member (should fail)
+POST {{baseUrl}}/workspaces/3/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 6,
+  "role": "VIEWER"
+}
+
+###
+### Try to remove workspace owner (should fail)
+DELETE {{baseUrl}}/workspaces/1/members/1
+Authorization: Bearer {{token}}
+
+###
+### Try to add member without required fields
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "role": "MEMBER"
+}
+
+###
+### Try to add member with invalid role
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 2,
+  "role": "SUPERUSER"
+}
+
+###
+### Try to add member to non-existent workspace
+POST {{baseUrl}}/workspaces/999/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 2,
+  "role": "MEMBER"
+}
+
+###
+### Try to add non-existent user as member
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "userId": 999,
+  "role": "MEMBER"
+}
+
+###
+### Non-owner trying to add member (should fail)
+POST {{baseUrl}}/workspaces/1/members
+Content-Type: application/json
+Authorization: Bearer {{token_member}}
+
+{
+  "userId": 4,
+  "role": "MEMBER"
+}
+
+###
+### Non-owner trying to remove member (should fail)
+DELETE {{baseUrl}}/workspaces/1/members/3
+Authorization: Bearer {{token_member}}
+
