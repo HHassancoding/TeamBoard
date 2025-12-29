@@ -8,9 +8,9 @@ import com.teamboard.entity.MemberRole;
 import com.teamboard.entity.User;
 import com.teamboard.entity.Workspace;
 import com.teamboard.entity.WorkspaceMember;
+import com.teamboard.service.UserService;
 import com.teamboard.service.WorkspaceService;
 import com.teamboard.service.WorkspaceMemberService;
-import com.teamboard.service.UserImp;
 import com.teamboard.util.JwtUtil;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,13 +34,13 @@ public class WorkspaceController {
   private final WorkspaceService workspaceService;
   private final WorkspaceMemberService workspaceMemberService;
   private final JwtUtil jwtUtil;
-  private final UserImp userImp;
+  private final UserService userImp;
 
   public WorkspaceController(
       WorkspaceService workspaceService,
       WorkspaceMemberService workspaceMemberService,
       JwtUtil jwtUtil,
-      UserImp userImp) {
+      UserService userImp) {
     this.workspaceService = workspaceService;
     this.workspaceMemberService = workspaceMemberService;
     this.jwtUtil = jwtUtil;
@@ -236,11 +236,16 @@ public class WorkspaceController {
 
   /**
    * Add a member to workspace.
-   * POST /api/workspaces/{id}/members
+   * POST /api/workspaces/{workspaceId}/members
+   *
+   * @param workspaceId ID of the workspace to add member to
+   * @param bearerToken JWT token of the workspace owner
+   * @param requestDTO contains userId (ID of user to add) and role (ADMIN, MEMBER, VIEWER)
+   * @return WorkspaceMemberResponseDTO with member details
    */
-  @PostMapping("/{id}/members")
+  @PostMapping("/{workspaceId}/members")
   public ResponseEntity<?> addMemberToWorkspace(
-      @PathVariable Long id,
+      @PathVariable Long workspaceId,
       @RequestHeader("Authorization") String bearerToken,
       @RequestBody WorkspaceMemberRequestDTO requestDTO) {
     try {
@@ -254,7 +259,7 @@ public class WorkspaceController {
       }
 
       // Get workspace
-      Workspace workspace = workspaceService.getWorkspace(id);
+      Workspace workspace = workspaceService.getWorkspace(workspaceId);
       if (workspace == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
       }
@@ -283,7 +288,7 @@ public class WorkspaceController {
 
       // Add member
       WorkspaceMember member =
-          workspaceMemberService.addMember(requestDTO.getUserId(), id, role);
+          workspaceMemberService.addMember(requestDTO.getUserId(), workspaceId, role);
       WorkspaceMemberResponseDTO responseDTO = convertToMemberResponseDTO(member);
 
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
@@ -297,11 +302,15 @@ public class WorkspaceController {
 
   /**
    * Remove a member from workspace.
-   * DELETE /api/workspaces/{id}/members/{userId}
+   * DELETE /api/workspaces/{workspaceId}/members/{userId}
+   *
+   * @param workspaceId ID of the workspace to remove member from
+   * @param userId ID of the user to remove from workspace
+   * @param bearerToken JWT token of the workspace owner
    */
-  @DeleteMapping("/{id}/members/{userId}")
+  @DeleteMapping("/{workspaceId}/members/{userId}")
   public ResponseEntity<?> removeMemberFromWorkspace(
-      @PathVariable Long id,
+      @PathVariable Long workspaceId,
       @PathVariable Long userId,
       @RequestHeader("Authorization") String bearerToken) {
     try {
@@ -315,7 +324,7 @@ public class WorkspaceController {
       }
 
       // Get workspace
-      Workspace workspace = workspaceService.getWorkspace(id);
+      Workspace workspace = workspaceService.getWorkspace(workspaceId);
       if (workspace == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
       }
@@ -327,7 +336,7 @@ public class WorkspaceController {
       }
 
       // Remove member
-      workspaceMemberService.removeMember(userId, id);
+      workspaceMemberService.removeMember(userId, workspaceId);
 
       return ResponseEntity.noContent().build();
     } catch (IllegalArgumentException e) {
@@ -340,19 +349,22 @@ public class WorkspaceController {
 
   /**
    * List all members of a workspace.
-   * GET /api/workspaces/{id}/members
+   * GET /api/workspaces/{workspaceId}/members
+   *
+   * @param workspaceId ID of the workspace to get members from
+   * @return List of WorkspaceMemberResponseDTO
    */
-  @GetMapping("/{id}/members")
-  public ResponseEntity<?> getWorkspaceMembers(@PathVariable Long id) {
+  @GetMapping("/{workspaceId}/members")
+  public ResponseEntity<?> getWorkspaceMembers(@PathVariable Long workspaceId) {
     try {
       // Validate workspace exists
-      Workspace workspace = workspaceService.getWorkspace(id);
+      Workspace workspace = workspaceService.getWorkspace(workspaceId);
       if (workspace == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Workspace not found");
       }
 
       // Get members
-      List<WorkspaceMember> members = workspaceMemberService.getMembersOfWorkspace(id);
+      List<WorkspaceMember> members = workspaceMemberService.getMembersOfWorkspace(workspaceId);
       List<WorkspaceMemberResponseDTO> responseDTOs =
           members.stream()
               .map(this::convertToMemberResponseDTO)
