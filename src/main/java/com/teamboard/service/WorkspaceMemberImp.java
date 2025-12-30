@@ -28,8 +28,12 @@ public class WorkspaceMemberImp implements WorkspaceMemberService {
   @Override
   @Transactional
   public WorkspaceMember addMember(Long userId, Long workspaceId, MemberRole role) {
+    System.out.println("=== START addMember: userId=" + userId + ", workspaceId=" + workspaceId);
+
     // Validate user exists
     User user = userService.getUser(userId);
+    System.out.println("=== After getUser: user=" + user);
+
     if (user == null) {
       throw new IllegalArgumentException("User not found with id: " + userId);
     }
@@ -55,6 +59,7 @@ public class WorkspaceMemberImp implements WorkspaceMemberService {
             .role(role != null ? role : MemberRole.MEMBER)
             .build();
 
+    System.out.println("=== END addMember: member saved successfully");
     return workspaceMemberRepository.save(member);
   }
 
