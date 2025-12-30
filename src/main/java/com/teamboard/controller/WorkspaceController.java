@@ -249,10 +249,18 @@ public class WorkspaceController {
       @RequestHeader("Authorization") String bearerToken,
       @RequestBody WorkspaceMemberRequestDTO requestDTO) {
     try {
+      System.out.println("=== START addMemberToWorkspace");
+      System.out.println("bearerToken: " + bearerToken);
+
       // Extract JWT token and resolve current user
       String token = bearerToken.substring(7);
+      System.out.println("token extracted: " + token);
+
       String email = jwtUtil.extractUsername(token);
+      System.out.println("email from JWT: " + email);
+
       User currentUser = userImp.findByEmail(email);
+      System.out.println("currentUser: " + currentUser);
 
       if (currentUser == null) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
@@ -293,8 +301,12 @@ public class WorkspaceController {
 
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     } catch (IllegalArgumentException e) {
+      System.out.println("❌ IllegalArgumentException: " + e.getMessage());
+      e.printStackTrace();
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
+      System.out.println("❌ Exception: " + e.getMessage());
+      e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to add member: " + e.getMessage());
     }

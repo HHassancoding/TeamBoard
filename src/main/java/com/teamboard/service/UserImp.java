@@ -23,8 +23,14 @@ public class UserImp implements UserService {
 
   @Override
   public User getUser(Long id) {
-    return userRepo.findById(id).orElse(null);
+    System.out.println("🔍 UserImp.getUser() called with id: " + id);
+    Optional<User> result = userRepo.findById(id);
+    System.out.println("🔍 userRepo.findById(" + id + ") returned: " + result);
+    User user = result.orElse(null);
+    System.out.println("🔍 Returning user: " + user);
+    return user;
   }
+
 
   @Override
   public User updateUser(User user) {
@@ -53,8 +59,14 @@ public class UserImp implements UserService {
   }
 
   public User findByEmail(String email){
-    return userRepo.findByEmail(email).orElse(null);
+    System.out.println("🔍 findByEmail called with email: " + email);
+    Optional<User> result = userRepo.findByEmail(email);
+    System.out.println("🔍 userRepo.findByEmail('" + email + "') returned: " + result);
+    User user = result.orElse(null);
+    System.out.println("🔍 Returning user: " + user);
+    return user;
   }
+
 
 
 }

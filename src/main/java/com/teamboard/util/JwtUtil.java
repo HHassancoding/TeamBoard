@@ -43,16 +43,21 @@ public class JwtUtil {
 
   public String extractUsername(String token){
     try {
-      return Jwts.parserBuilder()
+      String subject = Jwts.parserBuilder()
           .setSigningKey(getSigningKey())
           .build()
           .parseClaimsJws(token)
           .getBody()
           .getSubject();
+      System.out.println("✅ extractUsername success: " + subject);
+      return subject;
     }catch (Exception e){
+      System.out.println("❌ extractUsername FAILED: " + e.getMessage());
+      e.printStackTrace();
       return null;
     }
   }
+
 
   public boolean validateToken(String Token){
     try {
