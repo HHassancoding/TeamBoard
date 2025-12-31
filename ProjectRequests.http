@@ -1,0 +1,94 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+###
+### Variables
+@baseUrl = http://localhost:8080/api
+@workspaceId = 5
+@projectId = 1
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2NzE4NzE0NywiZXhwIjoxNzY3MTg4MDExfQ.JmZLG0iyE17YjmUAV1J1Jnr9kjYurLJISjY0QOCMcFI
+
+### Register Owner User (will create workspace)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "ProjectOwner@test.com",
+  "passwordHash": "password1234",
+  "name": "Project User",
+  "avatarInitials": "PU"
+}
+
+### Login as Owner
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "owner@test.com",
+  "password": "password123"
+}
+
+### Create Workspace (owner becomes ADMIN automatically)
+POST {{baseUrl}}/workspaces
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Test Projects",
+  "description": "A workspace for testing Projects"
+}
+
+
+### 1. CREATE PROJECT
+POST {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "New Project 2",
+  "description": "This is a new project"
+}
+
+### 2. GET ALL PROJECTS IN WORKSPACE
+GET {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Authorization: {{token}}
+
+### 3. GET SINGLE PROJECT
+GET {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
+Authorization: {{token}}
+
+### 4. UPDATE PROJECT
+PUT {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+  "name": "Updated Project Name",
+  "description": "Updated description"
+}
+
+### 5. DELETE PROJECT
+DELETE {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
+Authorization: {{token}}
+
+### ERROR TEST: Missing Authorization Header
+GET {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Content-Type: application/json
+
+### ERROR TEST: Invalid JWT Token
+GET {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Authorization: Bearer invalid_token_here
+Content-Type: application/json
+
+### ERROR TEST: Non-existent Workspace
+GET {{baseUrl}}/workspaces/999/projects
+Authorization: {{token}}
+
+### ERROR TEST: Non-existent Project
+GET {{baseUrl}}/workspaces/{{workspaceId}}/projects/999
+Authorization: {{token}}
+
+### ERROR TEST: User Not Member of Workspace
+GET {{baseUrl}}/workspaces/2/projects
+Authorization: {{token}}
