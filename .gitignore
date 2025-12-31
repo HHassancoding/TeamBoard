@@ -3,7 +3,6 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!**/src/main/reasources/application.properties
 
 ### STS ###
 .apt_generated
@@ -21,7 +20,7 @@ target/
 *.ipr
 
 # Secrets
-src/main/resources/application.properties
+src/main/resources/application-prod.properties
 src/main/resources/application.yml
 .env
 *.key
