@@ -24,7 +24,7 @@ jobs:
         run: mvn clean test
       
       - name: Build JAR with Maven
-        if: ()
+        if: success()
         run: mvn clean package -DskipTests
       
       - name: Trigger Render deployment
@@ -32,4 +32,3 @@ jobs:
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_WEBHOOK }} \
             -H "Content-Type: application/json"
-
