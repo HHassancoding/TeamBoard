@@ -9,25 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: teamboard
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres123
-          JWT_SECRET: ${{ secrets.JWT_SECRET }} 
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    env:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/teamboard
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres123
+
     steps:
       - uses: actions/checkout@v4
 
@@ -37,15 +19,6 @@ jobs:
           distribution: 'temurin'
           java-version: 21
           cache: maven
-
-      - name: Wait for Postgres
-        run: |
-          for i in {1..30}; do
-            if pg_isready -h localhost -p 5432; then
-              break
-            fi
-            sleep 2
-          done
 
       - name: Build and test
         run: mvn clean test
