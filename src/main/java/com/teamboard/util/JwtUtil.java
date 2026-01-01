@@ -2,7 +2,9 @@ package com.teamboard.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
+
+
+  @PostConstruct
+  public void debug() {
+    System.out.println("JWT secret length = " + secret.length());
+  }
+
   @Value("${jwt.secret}")
   private String secret;
 
@@ -19,8 +28,8 @@ public class JwtUtil {
   @Value("${jwt.refreshTokenExpiration}")
   private long refreshTokenExpiration;
 
-  private SecretKey getSigningKey(){
-    return Keys.hmacShaKeyFor( secret.getBytes());
+  private SecretKey getSigningKey() {
+    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
   }
 
   public String generateToken(String username){
