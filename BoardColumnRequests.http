@@ -1,0 +1,140 @@
+### BoardColumn API Tests
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@workspaceId = 6
+@projectId = 3
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2FyZGNvbHVtbl90ZXN0QGdtYWlsLmNvbSIsImlhdCI6MTc2NzI3OTE0NCwiZXhwIjoxNzY3MjgwMDA4fQ.6sSsS5rbn7ElCappI8sRPSRhg47wrEeKXEWh-PMIFNI
+###
+### SETUP - Register test user for BoardColumn tests
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "boardcolumn_test@gmail.com",
+  "passwordHash": "testpass123",
+  "name": "BoardColumn Tester",
+  "avatarInitials": "BCT"
+}
+
+###
+### SETUP - Login to get JWT token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "boardcolumn_test@gmail.com",
+  "password": "testpass123"
+}
+
+###
+### SETUP - Create workspace for board column testing
+POST {{baseUrl}}/workspaces
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "BoardColumn Test Workspace",
+  "description": "Workspace for testing board columns functionality"
+}
+
+###
+### SETUP - Create project (columns auto-create on project creation)
+POST {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "BoardColumn Test Project",
+  "description": "Test project for verifying board column auto-creation"
+}
+
+###
+### TEST 1: Get all columns for a project
+### Expected: 200 OK with 4 columns (BACKLOG, TO_DO, IN_PROGRESS, DONE)
+GET {{baseUrl}}/projects/{{projectId}}/columns
+Authorization: {{token}}
+
+###
+### TEST 2: Get columns with invalid project ID
+### Expected: 403 Forbidden (project not found)
+GET {{baseUrl}}/projects/99999/columns
+Authorization: {{token}}
+
+###
+### TEST 3: Get columns without authorization token
+### Expected: 403 Forbidden (invalid auth header)
+GET {{baseUrl}}/projects/{{projectId}}/columns
+
+###
+### TEST 4: Get columns with invalid token
+### Expected: 403 Forbidden (invalid user)
+GET {{baseUrl}}/projects/{{projectId}}/columns
+Authorization: Bearer invalid.token.here
+
+###
+### TEST 5: Verify column order (BACKLOG first, DONE last)
+### Expected: 200 OK with positions 1,2,3,4 in order
+GET {{baseUrl}}/projects/{{projectId}}/columns
+Authorization: {{token}}
+
+###
+### TEST 6: Create multiple projects and verify each has own columns
+POST {{baseUrl}}/workspaces/{{workspaceId}}/projects
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "Second Test Project",
+  "description": "Another project to verify separate columns"
+}
+
+###
+### TEST 7: Get columns from second project
+### Expected: 200 OK with 4 different columns (different IDs, same names)
+GET {{baseUrl}}/projects/2/columns
+Authorization: {{token}}
+
+###
+### TEST 8: Verify columns are read-only (no POST allowed)
+### Expected: 405 Method Not Allowed or 403 Forbidden
+POST {{baseUrl}}/projects/{{projectId}}/columns
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "CUSTOM",
+  "position": 5
+}
+
+###
+### TEST 9: Verify columns are read-only (no PUT allowed)
+### Expected: 405 Method Not Allowed or 403 Forbidden
+PUT {{baseUrl}}/projects/{{projectId}}/columns/1
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "UPDATED"
+}
+
+###
+### TEST 10: Verify columns are read-only (no DELETE allowed)
+### Expected: 405 Method Not Allowed or 403 Forbidden
+DELETE {{baseUrl}}/projects/{{projectId}}/columns/1
+Authorization: {{token}}
+
+###
+### TEST 11: User not in workspace cannot view columns
+### Expected: 403 Forbidden (user not a member of workspace)
+### First login as different user, then try to access
+GET {{baseUrl}}/projects/{{projectId}}/columns
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.differentToken.here
+
+###
+### TEST 12: Verify column response structure
+### Expected: 200 OK with proper JSON structure
+### Response should contain: id, name, position, projectId, createdAt
+GET {{baseUrl}}/projects/{{projectId}}/columns
+Authorization: {{token}}
+

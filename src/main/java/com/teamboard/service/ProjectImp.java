@@ -12,9 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProjectImp implements ProjectService{
 
   private final ProjectRepo projectRepo;
-  private final WorkspaceService workspaceService ;
-
-
+  private final WorkspaceService workspaceService;
 
   public ProjectImp(ProjectRepo projectRepo, WorkspaceService workspaceService) {
     this.projectRepo = projectRepo;

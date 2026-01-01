@@ -6,6 +6,7 @@ import com.teamboard.entity.Project;
 import com.teamboard.entity.User;
 import com.teamboard.entity.Workspace;
 import com.teamboard.entity.WorkspaceMember;
+import com.teamboard.service.BoardColumnService;
 import com.teamboard.service.ProjectService;
 import com.teamboard.service.UserService;
 import com.teamboard.service.WorkspaceMemberService;
@@ -35,15 +36,17 @@ public class ProjectController {
   private final JwtUtil jwtUtil;
   private final WorkspaceMemberService workspaceMemberService;
   private final UserService userService;
+  private final BoardColumnService boardColumnService;
 
   public ProjectController(WorkspaceService workspaceService, JwtUtil jwtUtil,
                            WorkspaceMemberService workspaceMemberService, UserService userService,
-                           ProjectService projectService) {
+                           ProjectService projectService, BoardColumnService boardColumnService) {
     this.workspaceService = workspaceService;
     this.jwtUtil = jwtUtil;
     this.workspaceMemberService = workspaceMemberService;
     this.userService = userService;
     this.projectService = projectService;
+    this.boardColumnService = boardColumnService;
   }
 
   /**
@@ -125,6 +128,10 @@ public class ProjectController {
       project.setCreatedBy(currentUser);
 
       Project createdProject = projectService.createProject(project);
+
+      // Auto-create 4 default columns for the project
+      boardColumnService.createDefaultColumns(createdProject.getId());
+
       ProjectResponseDTO responseDTO = convertToResponseDTO(createdProject);
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
