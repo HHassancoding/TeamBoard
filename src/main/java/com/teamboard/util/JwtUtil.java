@@ -25,7 +25,7 @@ public class JwtUtil {
   @Value("${jwt.expiration}")
   private long jwtExpiration;
 
-  @Value("${jwt.refreshTokenExpiration}")
+  @Value("${jwt.refreshTokenExpiration:604800000}")
   private long refreshTokenExpiration;
 
   private SecretKey getSigningKey() {
