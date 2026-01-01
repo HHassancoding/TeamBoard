@@ -5,8 +5,8 @@ GET https://examples.http-client.intellij.net/get
 ###
 ### Variables
 @baseUrl = http://localhost:8080/api
-@workspaceId = 5
-@projectId = 1
+@workspaceId = 6
+@projectId = 3
 @token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2NzE4NzE0NywiZXhwIjoxNzY3MTg4MDExfQ.JmZLG0iyE17YjmUAV1J1Jnr9kjYurLJISjY0QOCMcFI
 
 ### Register Owner User (will create workspace)

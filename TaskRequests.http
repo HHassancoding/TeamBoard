@@ -1,0 +1,224 @@
+### Task API Tests
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@projectId = 3
+@taskId = 1
+@columnId = 1
+@userId = 2
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2FyZGNvbHVtbl90ZXN0QGdtYWlsLmNvbSIsImlhdCI6MTc2NzI4MTYxMiwiZXhwIjoxNzY3MjgyNDc2fQ.jBdMLSpzL7E4QevNMBJOjIr8JA7zUyv2vHkuBQvq8ss
+
+###
+### SETUP - Register test user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "task_test@gmail.com",
+  "passwordHash": "testpass123",
+  "name": "Task Tester",
+  "avatarInitials": "TT"
+}
+
+###
+### SETUP - Login to get token
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "task_test@gmail.com",
+  "password": "testpass123"
+}
+
+###
+### SETUP - Create workspace
+POST {{baseUrl}}/workspaces
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "Task Test Workspace",
+  "description": "Testing task functionality"
+}
+
+###
+### SETUP - Create project
+POST {{baseUrl}}/workspaces/1/projects
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "name": "Task Test Project",
+  "description": "Project for testing tasks"
+}
+
+###
+### TEST 1: Create task in project
+### Expected: 201 Created with task in Backlog column
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Build login page",
+  "description": "Create user login form with validation",
+  "priority": "HIGH",
+  "assignedToId": null,
+  "dueDate": "2026-01-15T00:00:00"
+}
+
+###
+### TEST 2: Get all tasks in project
+### Expected: 200 OK with list of tasks
+GET {{baseUrl}}/projects/{{projectId}}/tasks
+Authorization: {{token}}
+
+###
+### TEST 3: Get single task
+### Expected: 200 OK with task details
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: {{token}}
+
+###
+### TEST 4: Update task (title, description, priority)
+### Expected: 200 OK with updated task
+PUT {{baseUrl}}/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Build login page - Updated",
+  "description": "Create user login form with validation and error handling",
+  "priority": "MEDIUM",
+  "assignedToId": null,
+  "dueDate": "2026-01-20T00:00:00"
+}
+
+###
+### TEST 5: Assign task to user
+### Expected: 200 OK with assigned user
+PUT {{baseUrl}}/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Build login page - Updated",
+  "description": "Create user login form with validation and error handling",
+  "priority": "MEDIUM",
+  "assignedToId": {{userId}},
+  "dueDate": "2026-01-20T00:00:00"
+}
+
+###
+### TEST 6: Move task to TO_DO column
+### Expected: 200 OK with updated column_id
+PATCH {{baseUrl}}/tasks/{{taskId}}/column/2
+Authorization: {{token}}
+
+###
+### TEST 7: Move task to IN_PROGRESS column
+### Expected: 200 OK with updated column_id
+PATCH {{baseUrl}}/tasks/{{taskId}}/column/3
+Authorization: {{token}}
+
+###
+### TEST 8: Move task to DONE column
+### Expected: 200 OK with updated column_id
+PATCH {{baseUrl}}/tasks/{{taskId}}/column/4
+Authorization: {{token}}
+
+###
+### TEST 9: Create task with missing title
+### Expected: 403 Forbidden (validation error)
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "",
+  "description": "Task without title"
+}
+
+###
+### TEST 10: Create task with invalid project
+### Expected: 403 Forbidden (project not found)
+POST {{baseUrl}}/projects/99999/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Test task"
+}
+
+###
+### TEST 11: Get task without auth
+### Expected: 403 Forbidden (invalid auth)
+GET {{baseUrl}}/tasks/{{taskId}}
+
+###
+### TEST 12: Move task to invalid column
+### Expected: 403 Forbidden (column validation)
+PATCH {{baseUrl}}/tasks/{{taskId}}/column/99999
+Authorization: {{token}}
+
+###
+### TEST 13: Create multiple tasks and verify order
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Design database schema",
+  "description": "Plan and design the database",
+  "priority": "HIGH"
+}
+
+###
+### TEST 14: Create task with priority LOW
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Write documentation",
+  "description": "Document the API",
+  "priority": "LOW",
+  "dueDate": "2026-02-01T00:00:00"
+}
+
+###
+### TEST 15: Create task without priority (should default to MEDIUM)
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Code review",
+  "description": "Review pull requests"
+}
+
+###
+### TEST 16: Delete task
+### Expected: 200 OK
+DELETE {{baseUrl}}/tasks/{{taskId}}
+Authorization: {{token}}
+
+###
+### TEST 17: Get deleted task
+### Expected: 403 Forbidden (task not found)
+GET {{baseUrl}}/tasks/{{taskId}}
+Authorization: {{token}}
+
+###
+### TEST 18: Unassign task (set assignedToId to null)
+PUT {{baseUrl}}/tasks/{{taskId}}
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "title": "Build login page",
+  "description": "Updated task",
+  "priority": "MEDIUM",
+  "assignedToId": null
+}
+

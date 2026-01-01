@@ -4,7 +4,7 @@
 @baseUrl = http://localhost:8080/api
 @workspaceId = 6
 @projectId = 3
-@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2FyZGNvbHVtbl90ZXN0QGdtYWlsLmNvbSIsImlhdCI6MTc2NzI3OTE0NCwiZXhwIjoxNzY3MjgwMDA4fQ.6sSsS5rbn7ElCappI8sRPSRhg47wrEeKXEWh-PMIFNI
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2FyZGNvbHVtbl90ZXN0QGdtYWlsLmNvbSIsImlhdCI6MTc2NzI4MTYxMiwiZXhwIjoxNzY3MjgyNDc2fQ.jBdMLSpzL7E4QevNMBJOjIr8JA7zUyv2vHkuBQvq8ss
 ###
 ### SETUP - Register test user for BoardColumn tests
 POST {{baseUrl}}/auth/register
