@@ -23,14 +23,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
   private final JwtAuthFilter jwtAuthFilter;
 
   @Autowired
   public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
     this.jwtAuthFilter = jwtAuthFilter;
   }
-
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -42,36 +40,30 @@ public class SecurityConfig {
       throws Exception {
     return config.getAuthenticationManager();
   }
+
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
 
-
+    // ✅ Allow all origins safely with credentials
     config.setAllowedOriginPatterns(List.of("*"));
-    config.setAllowedMethods(List.of(
-        "GET", "POST", "PUT", "DELETE", "OPTIONS"
-    ));
+    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
-    config.setAllowCredentials(true);
+    config.setAllowCredentials(true); // required for JWT
 
-    UrlBasedCorsConfigurationSource source =
-        new UrlBasedCorsConfigurationSource();
-
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
     return source;
   }
 
-
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        .cors(cors -> {})
+        .cors(cors -> {}) // uses the CorsConfigurationSource bean
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authz -> authz
-            .anyRequest().permitAll()
-        )
+        .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
         .httpBasic(AbstractHttpConfigurer::disable)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
