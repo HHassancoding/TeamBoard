@@ -50,12 +50,11 @@ public class SecurityConfig {
         "http://localhost:5173",
         "https://teamboard-frontend.onrender.com" // future
     ));
-
+    config.setAllowedOriginPatterns(List.of("*"));
     config.setAllowedMethods(List.of(
         "GET", "POST", "PUT", "DELETE", "OPTIONS"
     ));
 
-    config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source =
