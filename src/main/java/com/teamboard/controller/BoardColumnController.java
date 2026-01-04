@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/projects")
-@CrossOrigin(origins = "*")
 public class BoardColumnController {
 
   private final BoardColumnService boardColumnService;

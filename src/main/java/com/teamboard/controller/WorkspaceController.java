@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/workspaces")
-@CrossOrigin(origins = "*")
 public class WorkspaceController {
   private final WorkspaceService workspaceService;
   private final WorkspaceMemberService workspaceMemberService;
