@@ -1,5 +1,6 @@
 package com.teamboard.service;
 
+import com.teamboard.DTO.RegisterDTO;
 import com.teamboard.entity.User;
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +24,8 @@ public class UserImp implements UserService {
 
   @Override
   public User getUser(Long id) {
-    System.out.println("🔍 UserImp.getUser() called with id: " + id);
     Optional<User> result = userRepo.findById(id);
-    System.out.println("🔍 userRepo.findById(" + id + ") returned: " + result);
-    User user = result.orElse(null);
-    System.out.println("🔍 Returning user: " + user);
-    return user;
+    return result.orElse(null);
   }
 
 
@@ -36,12 +33,12 @@ public class UserImp implements UserService {
   public User updateUser(User user) {
     Optional<User> userToUpdate = userRepo.findById(user.getId());
     if(userToUpdate.isPresent()){
-      if(user.getPasswordHash()!=null && !user.getPasswordHash().isEmpty()){
-        if(!user.getPasswordHash().startsWith("$2")){
-          user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
-        }
-      }
-      return userRepo.save(user);
+      User existing = userToUpdate.get();
+      // Do not allow password changes through generic update
+      existing.setName(user.getName());
+      existing.setAvatarInitials(user.getAvatarInitials());
+      existing.setEmail(user.getEmail());
+      return userRepo.save(existing);
     }
     return null;
   }
@@ -53,20 +50,40 @@ public class UserImp implements UserService {
   }
 
   @Override
-  public User createUser(User user) {
-    user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+  public User createUser(RegisterDTO registerDTO) {
+    if (registerDTO.getPassword() == null || registerDTO.getPassword().isBlank()) {
+      throw new IllegalArgumentException("Password is required");
+    }
+    if (registerDTO.getEmail() == null || registerDTO.getEmail().isBlank()){
+      throw new IllegalArgumentException("Email is required");
+    }
+
+    // create entity and ensure we only set hashed password on entity
+    User user = new User();
+    user.setName(registerDTO.getName());
+    user.setEmail(registerDTO.getEmail());
+    user.setAvatarInitials(registerDTO.getAvatarInitials());
+    String hashed = passwordEncoder.encode(registerDTO.getPassword());
+    user.setPasswordHash(hashed);
     return userRepo.save(user);
   }
 
   public User findByEmail(String email){
-    System.out.println("🔍 findByEmail called with email: " + email);
     Optional<User> result = userRepo.findByEmail(email);
-    System.out.println("🔍 userRepo.findByEmail('" + email + "') returned: " + result);
-    User user = result.orElse(null);
-    System.out.println("🔍 Returning user: " + user);
-    return user;
+    return result.orElse(null);
   }
 
+  // Additional method to change password explicitly
+  public User changePassword(Long userId, String rawPassword){
+    if(rawPassword==null || rawPassword.isBlank()){
+      throw new IllegalArgumentException("Password is required");
+    }
+    Optional<User> userOpt = userRepo.findById(userId);
+    if(userOpt.isEmpty()) return null;
+    User user = userOpt.get();
+    user.setPasswordHash(passwordEncoder.encode(rawPassword));
+    return userRepo.save(user);
+  }
 
 
 }
