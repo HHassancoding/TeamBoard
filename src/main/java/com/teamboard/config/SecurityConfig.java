@@ -45,24 +45,41 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
 
+    // Frontend origins
     config.setAllowedOrigins(List.of(
         "http://localhost:5173",
         "https://teamboard-frontend.onrender.com"
     ));
 
+    // Methods including PATCH & OPTIONS preflight
     config.setAllowedMethods(List.of(
-        "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
     ));
 
-    config.setAllowedHeaders(List.of("*"));
+    // Explicitly allow headers your frontend may send
+    config.setAllowedHeaders(List.of(
+        "Authorization",
+        "Content-Type",
+        "Accept",
+        "Origin",
+        "X-Requested-With"
+    ));
+
+    // Expose headers if needed (optional)
+    config.setExposedHeaders(List.of(
+        "Authorization",
+        "Content-Disposition"
+    ));
+
+    // Allow credentials (cookies, JWT, etc.)
     config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source =
-        new UrlBasedCorsConfigurationSource();
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
 
     return source;
   }
+
 
 
   @Bean
