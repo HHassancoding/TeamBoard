@@ -71,11 +71,11 @@ public class ProjectController {
   }
 
   /**
-   * Validates that user has access to workspace
+   * Validates that user has access to workspace (either owner or member)
    * @param workspaceId ID of the workspace
    * @param currentUser Current authenticated user
-   * @return Workspace object if user is a member
-   * @throws IllegalArgumentException if workspace doesn't exist or user isn't a member
+   * @return Workspace object if user is owner or member
+   * @throws IllegalArgumentException if workspace doesn't exist or user doesn't have access
    */
   private Workspace validateWorkspaceAccess(Long workspaceId, User currentUser) throws Exception {
     Workspace workspace = workspaceService.getWorkspace(workspaceId);
@@ -83,9 +83,16 @@ public class ProjectController {
       throw new IllegalArgumentException("Workspace not found");
     }
 
+    // ✅ CHECK IF USER IS OWNER
+    boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
+
+    // ✅ CHECK IF USER IS MEMBER
     WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspace.getId());
-    if (member == null) {
-      throw new IllegalArgumentException("You are not a member of this workspace");
+    boolean isMember = member != null;
+
+    // ✅ ALLOW ACCESS IF OWNER OR MEMBER
+    if (!isOwner && !isMember) {
+      throw new IllegalArgumentException("You don't have access to this workspace");
     }
 
     return workspace;
