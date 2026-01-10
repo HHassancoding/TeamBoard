@@ -29,3 +29,6 @@ GET http://localhost:8080/api/users
 POST http://localhost:8080/api/auth/refresh
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYW16YUBnbWFpbC5jb20iLCJpYXQiOjE3NjY0OTY5OTYsImV4cCI6MTc2NzEwMTc5Nn0.QTLeeceD8M41A8XnHJhc67ThJ6eYbmX-bQ3XIivbgqc
 
+###
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYW1hQGdtYWlsLmNvbSIsImlhdCI6MTc2NzY0MDYyNywiZXhwIjoxNzY3NjQxNDkxfQ.-CIUIJvN6eo2h0HBpKP3z4LUjNYD4A0FSXsnDhJDgOE

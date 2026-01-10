@@ -81,6 +81,19 @@ public class WorkspaceController {
       workspace.setOwner(owner);
 
       Workspace savedWorkspace = workspaceService.createWorkspace(workspace);
+
+      // ✅ ADD THIS: Auto-add owner as ADMIN member
+      try {
+        workspaceMemberService.addMember(
+            owner.getId(),
+            savedWorkspace.getId(),
+            MemberRole.ADMIN
+        );
+      } catch (Exception e) {
+        // Log but don't fail workspace creation
+        System.err.println("Warning: Failed to add owner as member: " + e.getMessage());
+      }
+
       WorkspaceResponseDTO responseDTO = convertToResponseDTO(savedWorkspace);
 
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
