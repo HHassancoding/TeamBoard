@@ -181,7 +181,18 @@ public class ProjectController {
     try {
       User currentUser = validateAndGetUser(bearerToken);
       Workspace workspace = validateWorkspaceAccess(workspaceId, currentUser);
-      Project project = validateProjectOwnership(projectId, currentUser);
+
+      // ✅ FIX: Changed from validateProjectOwnership to workspace membership check
+      // Now allows any workspace member (not just creator) to view the project
+      Project project = projectService.getProjectById(projectId);
+      if (project == null) {
+        throw new IllegalArgumentException("Project not found");
+      }
+
+      // ✅ Verify project belongs to the workspace
+      if (!project.getWorkspace().getId().equals(workspaceId)) {
+        throw new IllegalArgumentException("Project does not belong to this workspace");
+      }
 
       ProjectResponseDTO responseDTO = convertToResponseDTO(project);
       return ResponseEntity.ok(responseDTO);

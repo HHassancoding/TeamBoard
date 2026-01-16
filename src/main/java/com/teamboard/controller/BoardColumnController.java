@@ -71,11 +71,11 @@ public class BoardColumnController {
   }
 
   /**
-   * Validates that user has access to project's workspace
+   * Validates that user has access to project's workspace (either owner or member)
    * @param projectId ID of the project
    * @param currentUser Current authenticated user
-   * @return Project object if user is a member of the workspace
-   * @throws IllegalArgumentException if project doesn't exist or user isn't a workspace member
+   * @return Project object if user is owner or member of the workspace
+   * @throws IllegalArgumentException if project doesn't exist or user isn't workspace owner/member
    */
   private Project validateProjectAccess(Long projectId, User currentUser) throws Exception {
     Project project = projectService.getProjectById(projectId);
@@ -84,8 +84,16 @@ public class BoardColumnController {
     }
 
     Workspace workspace = project.getWorkspace();
+
+    // ✅ CHECK IF USER IS WORKSPACE OWNER
+    boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
+
+    // ✅ CHECK IF USER IS WORKSPACE MEMBER
     WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspace.getId());
-    if (member == null) {
+    boolean isMember = member != null;
+
+    // ✅ ALLOW ACCESS IF OWNER OR MEMBER
+    if (!isOwner && !isMember) {
       throw new IllegalArgumentException("You are not a member of this workspace");
     }
 

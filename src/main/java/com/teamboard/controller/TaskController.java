@@ -70,8 +70,16 @@ public class TaskController {
     }
 
     Workspace workspace = project.getWorkspace();
+
+    // ✅ CHECK IF USER IS WORKSPACE OWNER
+    boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
+
+    // ✅ CHECK IF USER IS WORKSPACE MEMBER
     WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspace.getId());
-    if (member == null) {
+    boolean isMember = member != null;
+
+    // ✅ ALLOW ACCESS IF OWNER OR MEMBER
+    if (!isOwner && !isMember) {
       throw new IllegalArgumentException("You are not a member of this workspace");
     }
 
