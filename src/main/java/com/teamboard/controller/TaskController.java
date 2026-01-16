@@ -33,7 +33,6 @@ public class TaskController {
 
   private final TaskService taskService;
   private final ProjectService projectService;
-  private final WorkspaceService workspaceService;
   private final WorkspaceMemberService workspaceMemberService;
   private final UserService userService;
   private final JwtUtil jwtUtil;
@@ -43,13 +42,12 @@ public class TaskController {
       UserService userService, JwtUtil jwtUtil) {
     this.taskService = taskService;
     this.projectService = projectService;
-    this.workspaceService = workspaceService;
     this.workspaceMemberService = workspaceMemberService;
     this.userService = userService;
     this.jwtUtil = jwtUtil;
   }
 
-  private User validateAndGetUser(String bearerToken) throws Exception {
+  private User validateAndGetUser(String bearerToken) {
     if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
       throw new IllegalArgumentException("Invalid authorization header");
     }
@@ -65,7 +63,7 @@ public class TaskController {
     return currentUser;
   }
 
-  private Workspace validateProjectAccess(Long projectId, User currentUser) throws Exception {
+  private Workspace validateProjectAccess(Long projectId, User currentUser) {
     Project project = projectService.getProjectById(projectId);
     if (project == null) {
       throw new IllegalArgumentException("Project not found");
@@ -87,7 +85,7 @@ public class TaskController {
       @RequestBody TaskCreateRequestDTO taskRequestDTO) {
     try {
       User currentUser = validateAndGetUser(bearerToken);
-      Workspace workspace = validateProjectAccess(projectId, currentUser);
+      validateProjectAccess(projectId, currentUser);
 
       Project project = projectService.getProjectById(projectId);
       Task task = new Task();
@@ -123,7 +121,7 @@ public class TaskController {
       @RequestHeader("Authorization") String bearerToken) {
     try {
       User currentUser = validateAndGetUser(bearerToken);
-      Workspace workspace = validateProjectAccess(projectId, currentUser);
+      validateProjectAccess(projectId, currentUser);
 
       List<Task> tasks = taskService.getTasksByProject(projectId);
       List<TaskResponseDTO> responseDTOs = tasks.stream()
@@ -147,7 +145,7 @@ public class TaskController {
     try {
       User currentUser = validateAndGetUser(bearerToken);
       Task task = taskService.getTaskById(taskId);
-      Workspace workspace = validateProjectAccess(task.getProject().getId(), currentUser);
+      validateProjectAccess(task.getProject().getId(), currentUser);
 
       TaskResponseDTO responseDTO = convertToResponseDTO(task);
       return ResponseEntity.ok(responseDTO);
@@ -168,7 +166,7 @@ public class TaskController {
     try {
       User currentUser = validateAndGetUser(bearerToken);
       Task existingTask = taskService.getTaskById(taskId);
-      Workspace workspace = validateProjectAccess(existingTask.getProject().getId(), currentUser);
+      validateProjectAccess(existingTask.getProject().getId(), currentUser);
 
       existingTask.setTitle(taskRequestDTO.getTitle());
       existingTask.setDescription(taskRequestDTO.getDescription());
@@ -201,7 +199,7 @@ public class TaskController {
     try {
       User currentUser = validateAndGetUser(bearerToken);
       Task task = taskService.getTaskById(taskId);
-      Workspace workspace = validateProjectAccess(task.getProject().getId(), currentUser);
+      validateProjectAccess(task.getProject().getId(), currentUser);
 
       taskService.deleteTask(taskId);
       return ResponseEntity.ok("Task deleted successfully");
@@ -222,7 +220,7 @@ public class TaskController {
     try {
       User currentUser = validateAndGetUser(bearerToken);
       Task task = taskService.getTaskById(taskId);
-      Workspace workspace = validateProjectAccess(task.getProject().getId(), currentUser);
+      validateProjectAccess(task.getProject().getId(), currentUser);
 
       Task movedTask = taskService.moveTaskToColumn(taskId, columnId);
       TaskResponseDTO responseDTO = convertToResponseDTO(movedTask);
@@ -233,6 +231,91 @@ public class TaskController {
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred while moving the task: " + e.getMessage());
+    }
+  }
+
+  @PostMapping("/workspaces/{workspaceId}/projects/{projectId}/tasks")
+  public ResponseEntity<?> createTaskAlias(
+      @PathVariable Long workspaceId,
+      @PathVariable Long projectId,
+      @RequestHeader("Authorization") String bearerToken,
+      @RequestBody TaskCreateRequestDTO taskRequestDTO) {
+    try {
+      User currentUser = validateAndGetUser(bearerToken);
+
+      Project project = projectService.getProjectById(projectId);
+      if (project == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+      }
+      if (!project.getWorkspace().getId().equals(workspaceId)) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
+      }
+
+      WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
+      if (member == null) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
+      }
+
+      Task task = new Task();
+      task.setTitle(taskRequestDTO.getTitle());
+      task.setDescription(taskRequestDTO.getDescription());
+      task.setProject(project);
+      task.setPriority(taskRequestDTO.getPriority());
+      task.setDueDate(taskRequestDTO.getDueDate());
+      task.setCreatedBy(currentUser);
+
+      if (taskRequestDTO.getAssignedToId() != null) {
+        User assignedUser = userService.getUser(taskRequestDTO.getAssignedToId());
+        if (assignedUser != null) {
+          task.setAssignedTo(assignedUser);
+        }
+      }
+
+      Task createdTask = taskService.createTask(task);
+      TaskResponseDTO responseDTO = convertToResponseDTO(createdTask);
+      return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
+
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("An error occurred while creating the task: " + e.getMessage());
+    }
+  }
+
+  @GetMapping("/workspaces/{workspaceId}/projects/{projectId}/tasks")
+  public ResponseEntity<?> getTasksByProjectAlias(
+      @PathVariable Long workspaceId,
+      @PathVariable Long projectId,
+      @RequestHeader("Authorization") String bearerToken) {
+    try {
+      User currentUser = validateAndGetUser(bearerToken);
+
+      Project project = projectService.getProjectById(projectId);
+      if (project == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
+      }
+      if (!project.getWorkspace().getId().equals(workspaceId)) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
+      }
+
+      WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
+      if (member == null) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
+      }
+
+      List<Task> tasks = taskService.getTasksByProject(projectId);
+      List<TaskResponseDTO> responseDTOs = tasks.stream()
+          .map(this::convertToResponseDTO)
+          .toList();
+
+      return ResponseEntity.ok(responseDTOs);
+
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("An error occurred while fetching tasks: " + e.getMessage());
     }
   }
 

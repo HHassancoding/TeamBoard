@@ -23,11 +23,11 @@ Content-Type: application/json
 ### CREATE WORKSPACE TEST - Create workspace "Team Project 1"
 POST http://localhost:8080/api/workspaces
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ3b3Jrc3BhY2VfdGVzdEBnbWFpbC5jb20iLCJpYXQiOjE3NjY5MzI2MzYsImV4cCI6MTc2NjkzMjcyM30.8zO73bCiMHYtGNyo5ekUK15bw3OLkDk-m6yDXecok-Y
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2ODU3ODQwMSwiZXhwIjoxNzY4NTc5MjY1fQ.NfDUgykqlGhwii9wDgh-W4crvjDjB1UAG9Si-mWqWAs
 
 
 {
-  "name": "Team Project 2",
+  "name": " Project Testing",
   "description": "First collaborative workspace for team 2"
 }
 
@@ -49,7 +49,7 @@ Content-Type: application/json
 
 ###
 ### GET WORKSPACE BY ID (Replace 1 with actual workspace ID from create response)
-GET http://localhost:8080/api/workspaces/1
+GET http://localhost:8080/api/workspaces/8
 Content-Type: application/json
 
 ###

@@ -4,8 +4,8 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
-@workspaceId = 1
-@projectId = 1
+@workspaceId = 8
+@projectId = 4
 @taskId = 1
 @columnId = 1
 @userId = 2
@@ -135,7 +135,6 @@ Content-Type: application/json
   "priority": "LOW"
 }
 
----
 
 ### 4c. Update Task - Only Assignee
 PUT {{baseUrl}}/tasks/{{taskId}}

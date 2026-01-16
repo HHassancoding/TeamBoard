@@ -2,9 +2,9 @@
 
 ### Variables
 @baseUrl = http://localhost:8080/api
-@workspaceId = 6
-@projectId = 3
-@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2FyZGNvbHVtbl90ZXN0QGdtYWlsLmNvbSIsImlhdCI6MTc2NzI4MTYxMiwiZXhwIjoxNzY3MjgyNDc2fQ.jBdMLSpzL7E4QevNMBJOjIr8JA7zUyv2vHkuBQvq8ss
+@workspaceId = 8
+@projectId = 4
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2ODU3ODQwMSwiZXhwIjoxNzY4NTc5MjY1fQ.NfDUgykqlGhwii9wDgh-W4crvjDjB1UAG9Si-mWqWAs
 ###
 ### SETUP - Register test user for BoardColumn tests
 POST {{baseUrl}}/auth/register

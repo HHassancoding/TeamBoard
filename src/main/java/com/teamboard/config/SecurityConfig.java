@@ -36,8 +36,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-      throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
     return config.getAuthenticationManager();
   }
 
@@ -48,6 +47,7 @@ public class SecurityConfig {
     // Frontend origins
     config.setAllowedOrigins(List.of(
         "http://localhost:5173",
+        "http://localhost:3000",
         "https://teamboard-frontend.onrender.com"
     ));
 
@@ -83,18 +83,22 @@ public class SecurityConfig {
 
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .cors(cors -> {}) // uses the CorsConfigurationSource bean
-        .csrf(AbstractHttpConfigurer::disable)
-        .sessionManagement(session ->
-            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/api/auth/**").permitAll()
-            .anyRequest().authenticated()
-            )
-        .httpBasic(AbstractHttpConfigurer::disable)
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+  public SecurityFilterChain filterChain(HttpSecurity http) {
+    try {
+      http
+          .cors(cors -> {}) // uses the CorsConfigurationSource bean
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(session ->
+              session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .authorizeHttpRequests(authz -> authz
+              .requestMatchers("/api/auth/**").permitAll()
+              .anyRequest().authenticated()
+              )
+          .httpBasic(AbstractHttpConfigurer::disable)
+          .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to configure security filter chain", e);
+    }
 
     return http.build();
   }

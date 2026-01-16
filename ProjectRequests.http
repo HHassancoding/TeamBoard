@@ -5,9 +5,9 @@ GET https://examples.http-client.intellij.net/get
 ###
 ### Variables
 @baseUrl = http://localhost:8080/api
-@workspaceId = 6
-@projectId = 3
-@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2NzE4NzE0NywiZXhwIjoxNzY3MTg4MDExfQ.JmZLG0iyE17YjmUAV1J1Jnr9kjYurLJISjY0QOCMcFI
+@workspaceId = 8
+@projectId = 4
+@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2ODU3ODQwMSwiZXhwIjoxNzY4NTc5MjY1fQ.NfDUgykqlGhwii9wDgh-W4crvjDjB1UAG9Si-mWqWAs
 
 ### Register Owner User (will create workspace)
 POST {{baseUrl}}/auth/register
@@ -46,7 +46,7 @@ Authorization: {{token}}
 Content-Type: application/json
 
 {
-  "name": "New Project 2",
+  "name": "New Project Test",
   "description": "This is a new project"
 }
 
