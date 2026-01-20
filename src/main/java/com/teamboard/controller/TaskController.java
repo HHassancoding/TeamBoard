@@ -116,7 +116,25 @@ public class TaskController {
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+      String errorMsg = e.getMessage();
+
+      // Authorization-related errors
+      if (errorMsg != null && (errorMsg.contains("not a member") ||
+          errorMsg.contains("don't have access") ||
+          errorMsg.contains("Only the") ||
+          errorMsg.contains("Cannot remove"))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMsg);
+      }
+
+      // Resource not found errors
+      if (errorMsg != null && (errorMsg.contains("not found") ||
+          errorMsg.contains("Backlog column not found"))) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMsg);
+      }
+
+      // All other IllegalArgumentExceptions are validation errors
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(errorMsg != null ? errorMsg : "Invalid request");
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred while creating the task: " + e.getMessage());
@@ -289,7 +307,25 @@ public class TaskController {
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+      String errorMsg = e.getMessage();
+
+      // Authorization-related errors
+      if (errorMsg != null && (errorMsg.contains("not a member") ||
+          errorMsg.contains("don't have access") ||
+          errorMsg.contains("Only the") ||
+          errorMsg.contains("Cannot remove"))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMsg);
+      }
+
+      // Resource not found errors
+      if (errorMsg != null && (errorMsg.contains("not found") ||
+          errorMsg.contains("Backlog column not found"))) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMsg);
+      }
+
+      // All other IllegalArgumentExceptions are validation errors
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(errorMsg != null ? errorMsg : "Invalid request");
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred while creating the task: " + e.getMessage());
@@ -330,7 +366,22 @@ public class TaskController {
       return ResponseEntity.ok(responseDTOs);
 
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+      String errorMsg = e.getMessage();
+
+      // Authorization-related errors
+      if (errorMsg != null && (errorMsg.contains("not a member") ||
+          errorMsg.contains("don't have access"))) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMsg);
+      }
+
+      // Resource not found errors
+      if (errorMsg != null && errorMsg.contains("not found")) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMsg);
+      }
+
+      // All other IllegalArgumentExceptions are validation errors
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(errorMsg != null ? errorMsg : "Invalid request");
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred while fetching tasks: " + e.getMessage());
