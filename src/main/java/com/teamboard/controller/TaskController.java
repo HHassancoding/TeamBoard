@@ -266,26 +266,59 @@ public class TaskController {
       @PathVariable Long projectId,
       @RequestHeader("Authorization") String bearerToken,
       @RequestBody TaskCreateRequestDTO taskRequestDTO) {
-    try {
-      User currentUser = validateAndGetUser(bearerToken);
+    System.out.println("========================================");
+    System.out.println("TASK CREATION REQUEST START");
+    System.out.println("========================================");
+    System.out.println("Endpoint: POST /api/workspaces/" + workspaceId + "/projects/" + projectId + "/tasks");
+    System.out.println("Request DTO: " + taskRequestDTO);
 
+    try {
+      System.out.println("Step 1: Validating JWT token...");
+      User currentUser = validateAndGetUser(bearerToken);
+      System.out.println("✓ JWT Valid - User ID: " + currentUser.getId() + ", Email: " + currentUser.getEmail());
+
+      System.out.println("Step 2: Fetching project with ID: " + projectId);
       Project project = projectService.getProjectById(projectId);
       if (project == null) {
+        System.out.println("✗ ERROR: Project not found - ID: " + projectId);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found");
       }
+      System.out.println("✓ Project found - ID: " + project.getId() + ", Name: " + project.getName());
+
+      System.out.println("Step 3: Validating project belongs to workspace...");
+      System.out.println("  - URL workspaceId: " + workspaceId);
+      System.out.println("  - Project's workspaceId: " + project.getWorkspace().getId());
       if (!project.getWorkspace().getId().equals(workspaceId)) {
+        System.out.println("✗ ERROR: Project does not belong to workspace");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
       }
+      System.out.println("✓ Project belongs to workspace");
 
       // Check if user is workspace owner OR workspace member
       Workspace workspace = project.getWorkspace();
+      System.out.println("Step 4: Checking workspace access...");
+      System.out.println("  - Workspace ID: " + workspace.getId());
+      System.out.println("  - Workspace Name: " + workspace.getName());
+      System.out.println("  - Workspace Owner ID: " + workspace.getOwner().getId());
+      System.out.println("  - Current User ID: " + currentUser.getId());
+
       boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
+      System.out.println("  - Is Owner? " + isOwner);
+
       WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
       boolean isMember = member != null;
+      System.out.println("  - Is Member? " + isMember);
+      if (isMember && member != null) {
+        System.out.println("  - Member Role: " + member.getRole());
+      }
 
       if (!isOwner && !isMember) {
+        System.out.println("✗ AUTHORIZATION FAILED: User is neither owner nor member");
+        System.out.println("========================================");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
       }
+      System.out.println("✓ Authorization passed - User has access");
+      System.out.println("Step 5: Creating task object...");
 
       Task task = new Task();
       task.setTitle(taskRequestDTO.getTitle());
@@ -295,18 +328,41 @@ public class TaskController {
       task.setDueDate(taskRequestDTO.getDueDate());
       task.setCreatedBy(currentUser);
 
+      System.out.println("  - Title: " + taskRequestDTO.getTitle());
+      System.out.println("  - Description: " + taskRequestDTO.getDescription());
+      System.out.println("  - Priority: " + taskRequestDTO.getPriority());
+      System.out.println("  - DueDate: " + taskRequestDTO.getDueDate());
+      System.out.println("  - AssignedToId: " + taskRequestDTO.getAssignedToId());
+
       if (taskRequestDTO.getAssignedToId() != null) {
+        System.out.println("Step 6: Fetching assigned user...");
         User assignedUser = userService.getUser(taskRequestDTO.getAssignedToId());
         if (assignedUser != null) {
           task.setAssignedTo(assignedUser);
+          System.out.println("✓ Assigned to user: " + assignedUser.getName() + " (ID: " + assignedUser.getId() + ")");
+        } else {
+          System.out.println("⚠ Warning: Assigned user not found - ID: " + taskRequestDTO.getAssignedToId());
         }
       }
 
+      System.out.println("Step 7: Calling taskService.createTask()...");
       Task createdTask = taskService.createTask(task);
+      System.out.println("✓ Task created successfully - ID: " + createdTask.getId());
+
+      System.out.println("Step 8: Converting to response DTO...");
       TaskResponseDTO responseDTO = convertToResponseDTO(createdTask);
+      System.out.println("✓ Response DTO created");
+      System.out.println("========================================");
+      System.out.println("TASK CREATION SUCCESS - Returning 201");
+      System.out.println("========================================");
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
 
     } catch (IllegalArgumentException e) {
+      System.out.println("✗ EXCEPTION CAUGHT: IllegalArgumentException");
+      System.out.println("  - Message: " + e.getMessage());
+      System.out.println("  - Stack trace:");
+      e.printStackTrace();
+      System.out.println("========================================");
       String errorMsg = e.getMessage();
 
       // Authorization-related errors
@@ -314,19 +370,28 @@ public class TaskController {
           errorMsg.contains("don't have access") ||
           errorMsg.contains("Only the") ||
           errorMsg.contains("Cannot remove"))) {
+        System.out.println("Returning 403 FORBIDDEN - Authorization error");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMsg);
       }
 
       // Resource not found errors
       if (errorMsg != null && (errorMsg.contains("not found") ||
           errorMsg.contains("Backlog column not found"))) {
+        System.out.println("Returning 404 NOT FOUND - Resource missing");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMsg);
       }
 
       // All other IllegalArgumentExceptions are validation errors
+      System.out.println("Returning 400 BAD REQUEST - Validation error");
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(errorMsg != null ? errorMsg : "Invalid request");
     } catch (Exception e) {
+      System.out.println("✗ EXCEPTION CAUGHT: " + e.getClass().getName());
+      System.out.println("  - Message: " + e.getMessage());
+      System.out.println("  - Stack trace:");
+      e.printStackTrace();
+      System.out.println("========================================");
+      System.out.println("Returning 500 INTERNAL SERVER ERROR");
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("An error occurred while creating the task: " + e.getMessage());
     }
