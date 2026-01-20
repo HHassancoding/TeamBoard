@@ -259,8 +259,13 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
       }
 
+      // Check if user is workspace owner OR workspace member
+      Workspace workspace = project.getWorkspace();
+      boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
       WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
-      if (member == null) {
+      boolean isMember = member != null;
+
+      if (!isOwner && !isMember) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
       }
 
@@ -307,8 +312,13 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
       }
 
+      // Check if user is workspace owner OR workspace member
+      Workspace workspace = project.getWorkspace();
+      boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
       WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
-      if (member == null) {
+      boolean isMember = member != null;
+
+      if (!isOwner && !isMember) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
       }
 

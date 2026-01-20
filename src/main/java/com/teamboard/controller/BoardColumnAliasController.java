@@ -4,6 +4,7 @@ import com.teamboard.DTO.BoardColumnResponseDTO;
 import com.teamboard.entity.BoardColumn;
 import com.teamboard.entity.Project;
 import com.teamboard.entity.User;
+import com.teamboard.entity.Workspace;
 import com.teamboard.entity.WorkspaceMember;
 import com.teamboard.service.BoardColumnService;
 import com.teamboard.service.ProjectService;
@@ -78,8 +79,13 @@ public class BoardColumnAliasController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Project not found in workspace");
       }
 
+      // Check if user is workspace owner OR workspace member
+      Workspace workspace = project.getWorkspace();
+      boolean isOwner = workspace.getOwner().getId().equals(currentUser.getId());
       WorkspaceMember member = workspaceMemberService.getMember(currentUser.getId(), workspaceId);
-      if (member == null) {
+      boolean isMember = member != null;
+
+      if (!isOwner && !isMember) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
       }
 
