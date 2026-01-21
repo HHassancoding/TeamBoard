@@ -32,33 +32,90 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+    String requestURI = request.getRequestURI();
+    String method = request.getMethod();
+
     // Skip JWT validation for CORS preflight requests
     if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-      logger.debug("Skipping JWT validation for OPTIONS preflight request");
+      System.out.println("⏭ Skipping JWT validation for OPTIONS preflight: " + requestURI);
       filterChain.doFilter(request, response);
       return;
     }
 
+    System.out.println("========================================");
+    System.out.println("JWT FILTER START");
+    System.out.println("========================================");
+    System.out.println("Request URI: " + requestURI);
+    System.out.println("Method: " + method);
+
+    String authHeader = request.getHeader("Authorization");
+    System.out.println("Has Authorization Header: " + (authHeader != null));
+
+    if (authHeader != null) {
+      System.out.println("Authorization Header Starts With 'Bearer ': " + authHeader.startsWith("Bearer "));
+      if (authHeader.startsWith("Bearer ")) {
+        String tokenPreview = authHeader.substring(0, Math.min(30, authHeader.length()));
+        System.out.println("Token Preview: " + tokenPreview + "...");
+      }
+    } else {
+      System.out.println("⚠ WARNING: No Authorization header present - request will fail authentication");
+    }
+
     try{
       String token = extractToken(request);
-      if(token != null && jwtUtil.validateToken(token)){
-        String username = jwtUtil.extractUsername(token);
-        var userDetails = userDetailsService.loadUserByUsername(username);
+      System.out.println("Token extracted: " + (token != null));
 
-        UsernamePasswordAuthenticationToken authentication =
-            UsernamePasswordAuthenticationToken.authenticated(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
+      if(token != null){
+        System.out.println("Step 1: Validating token...");
+        boolean isValid = jwtUtil.validateToken(token);
+        System.out.println("Token validation result: " + isValid);
+
+        if(isValid){
+          System.out.println("Step 2: Extracting username from token...");
+          String username = jwtUtil.extractUsername(token);
+          System.out.println("Username extracted: " + username);
+
+          if(username != null) {
+            System.out.println("Step 3: Loading user details for: " + username);
+            var userDetails = userDetailsService.loadUserByUsername(username);
+            System.out.println("User details loaded: " + userDetails.getUsername());
+            System.out.println("User authorities: " + userDetails.getAuthorities());
+
+            System.out.println("Step 4: Creating authentication token...");
+            UsernamePasswordAuthenticationToken authentication =
+                UsernamePasswordAuthenticationToken.authenticated(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
+                );
+            authentication.setDetails(
+                new WebAuthenticationDetailsSource().buildDetails(request)
             );
-        authentication.setDetails(
-            new WebAuthenticationDetailsSource().buildDetails(request)
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("✅ Authentication set successfully in SecurityContext");
+          } else {
+            System.out.println("❌ Username extraction failed - null username");
+          }
+        } else {
+          System.out.println("❌ Token validation FAILED - token is invalid or expired");
+        }
+      } else {
+        System.out.println("❌ No token extracted from Authorization header");
       }
     }catch(Exception e){
-      logger.error("Could not set user authentication in security context");
+      System.out.println("========================================");
+      System.out.println("❌ EXCEPTION CAUGHT IN JWT FILTER");
+      System.out.println("Exception Type: " + e.getClass().getName());
+      System.out.println("Exception Message: " + e.getMessage());
+      System.out.println("Stack trace:");
+      e.printStackTrace();
+      System.out.println("========================================");
     }
+
+    System.out.println("JWT Filter completed - Passing to next filter");
+    System.out.println("Current Authentication: " + SecurityContextHolder.getContext().getAuthentication());
+    System.out.println("========================================");
+
     filterChain.doFilter(request, response);
   }
 
