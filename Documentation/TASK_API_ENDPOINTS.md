@@ -12,10 +12,13 @@ Task endpoints allow workspace members to create, manage, and retrieve tasks wit
 
 ## 1. Create Task
 **Method:** `POST`  
-**Endpoint:** `/projects/{projectId}/tasks` OR `/workspaces/{workspaceId}/projects/{projectId}/tasks`  
+**Endpoints:**
+- **Workspace-scoped:** `/workspaces/{workspaceId}/projects/{projectId}/tasks` (Recommended for frontend)
+- **Project-scoped:** `/projects/{projectId}/tasks` (Legacy support)
+
 **Description:** Create a new task in the specified project (defaults to Backlog column)
 
-**Note:** Both endpoints are supported. The workspace-scoped endpoint is recommended for frontend applications to maintain consistent URL structure.
+**Note:** The workspace-scoped endpoint is recommended for frontend applications as it maintains consistent URL structure with other workspace-scoped endpoints and provides better context validation.
 
 **Request Body:**
 ```json
@@ -51,7 +54,7 @@ Task endpoints allow workspace members to create, manage, and retrieve tasks wit
 
 **Path Parameters:**
 - `projectId` (Long, required) - Project ID
-- `workspaceId` (Long, optional) - Workspace ID (required when using workspace-scoped endpoint)
+- `workspaceId` (Long) - Workspace ID (required for workspace-scoped endpoint)
 
 **Request Headers:**
 ```
@@ -69,7 +72,7 @@ Authorization: Bearer {token} (required - must be workspace member or owner)
 - Assignee is optional (null means unassigned)
 - Due date is optional
 - User must be either a workspace member or the workspace owner
-- **Note:** The `columnId` field is NOT accepted in the request body. Tasks are automatically created in the Backlog column. Use the move endpoint to change columns after creation.
+- **Note:** The `columnId` field is NOT accepted in the request body. Tasks are automatically created in the Backlog column. To move a task to a different column after creation, use the move endpoint: `PATCH /tasks/{taskId}/column/{columnId}` (see section 6 below).
 
 **Error Responses:**
 - `400 Bad Request` - Invalid input, title required
@@ -82,15 +85,16 @@ Authorization: Bearer {token} (required - must be workspace member or owner)
 
 ## 2. Get All Tasks in Project
 **Method:** `GET`  
-**Endpoint:** `/projects/{projectId}/tasks` OR `/workspaces/{workspaceId}/projects/{projectId}/tasks`  
-**Description:** Retrieve all tasks for a specific project
+**Endpoints:**
+- **Workspace-scoped:** `/workspaces/{workspaceId}/projects/{projectId}/tasks` (Recommended for frontend)
+- **Project-scoped:** `/projects/{projectId}/tasks` (Legacy support)
 
-**Note:** Both endpoints are supported. The workspace-scoped endpoint is recommended for frontend applications.
+**Description:** Retrieve all tasks for a specific project
 
 
 **Path Parameters:**
 - `projectId` (Long, required) - Project ID
-- `workspaceId` (Long, optional) - Workspace ID (required when using workspace-scoped endpoint)
+- `workspaceId` (Long) - Workspace ID (required for workspace-scoped endpoint)
 
 **Request Headers:**
 ```
