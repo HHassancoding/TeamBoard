@@ -12,15 +12,17 @@ Task endpoints allow workspace members to create, manage, and retrieve tasks wit
 
 ## 1. Create Task
 **Method:** `POST`  
-**Endpoint:** `/projects/{projectId}/tasks`  
+**Endpoint:** `/projects/{projectId}/tasks` OR `/workspaces/{workspaceId}/projects/{projectId}/tasks`  
 **Description:** Create a new task in the specified project (defaults to Backlog column)
+
+**Note:** Both endpoints are supported. The workspace-scoped endpoint is recommended for frontend applications to maintain consistent URL structure.
 
 **Request Body:**
 ```json
 {
   "title": "string (required)",
   "description": "string (optional)",
-  "assignedTo": "Long (optional - user ID)",
+  "assignedToId": "Long (optional - user ID)",
   "priority": "LOW | MEDIUM | HIGH (optional, defaults to MEDIUM)",
   "dueDate": "2025-01-15T23:59:59Z (optional, ISO 8601 format)"
 }
@@ -49,19 +51,25 @@ Task endpoints allow workspace members to create, manage, and retrieve tasks wit
 
 **Path Parameters:**
 - `projectId` (Long, required) - Project ID
+- `workspaceId` (Long, optional) - Workspace ID (required when using workspace-scoped endpoint)
 
 **Request Headers:**
 ```
-Authorization: Bearer {token} (required - must be workspace member)
+Authorization: Bearer {token} (required - must be workspace member or owner)
 ```
+
+**Authorization:**
+- User must be either the workspace owner OR a workspace member
+- Both endpoints verify workspace membership before allowing task creation
 
 **Validation Rules:**
 - Title is required and cannot be empty
-- Task defaults to BACKLOG column (position 1)
+- Task defaults to BACKLOG column (position 1) - do NOT send columnId in request
 - Priority defaults to MEDIUM if not specified
 - Assignee is optional (null means unassigned)
 - Due date is optional
-- User must be a member of the workspace
+- User must be either a workspace member or the workspace owner
+- **Note:** The `columnId` field is NOT accepted in the request body. Tasks are automatically created in the Backlog column. Use the move endpoint to change columns after creation.
 
 **Error Responses:**
 - `400 Bad Request` - Invalid input, title required
@@ -74,12 +82,15 @@ Authorization: Bearer {token} (required - must be workspace member)
 
 ## 2. Get All Tasks in Project
 **Method:** `GET`  
-**Endpoint:** `/projects/{projectId}/tasks`  
+**Endpoint:** `/projects/{projectId}/tasks` OR `/workspaces/{workspaceId}/projects/{projectId}/tasks`  
 **Description:** Retrieve all tasks for a specific project
+
+**Note:** Both endpoints are supported. The workspace-scoped endpoint is recommended for frontend applications.
 
 
 **Path Parameters:**
 - `projectId` (Long, required) - Project ID
+- `workspaceId` (Long, optional) - Workspace ID (required when using workspace-scoped endpoint)
 
 **Request Headers:**
 ```
