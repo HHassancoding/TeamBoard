@@ -36,15 +36,17 @@ public class TaskController {
   private final WorkspaceMemberService workspaceMemberService;
   private final UserService userService;
   private final JwtUtil jwtUtil;
+  private final com.teamboard.repository.BoardColumnRepository boardColumnRepository;
 
   public TaskController(TaskService taskService, ProjectService projectService,
       WorkspaceService workspaceService, WorkspaceMemberService workspaceMemberService,
-      UserService userService, JwtUtil jwtUtil) {
+      UserService userService, JwtUtil jwtUtil, com.teamboard.repository.BoardColumnRepository boardColumnRepository) {
     this.taskService = taskService;
     this.projectService = projectService;
     this.workspaceMemberService = workspaceMemberService;
     this.userService = userService;
     this.jwtUtil = jwtUtil;
+    this.boardColumnRepository = boardColumnRepository;
   }
 
   private User validateAndGetUser(String bearerToken) {
@@ -318,12 +320,25 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a member of this workspace");
       }
       System.out.println("✓ Authorization passed - User has access");
-      System.out.println("Step 5: Creating task object...");
 
+      System.out.println("Step 5: Fetching Backlog column for project...");
+      java.util.List<com.teamboard.entity.BoardColumn> columns = boardColumnRepository.findByProjectIdOrderByPosition(projectId);
+      if (columns == null || columns.isEmpty()) {
+        System.out.println("✗ ERROR: Project has no columns");
+        System.out.println("========================================");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Project has no columns. Please create columns first.");
+      }
+
+      // Get first column (Backlog or first column in order)
+      com.teamboard.entity.BoardColumn backlogColumn = columns.get(0);
+      System.out.println("✓ Column found - ID: " + backlogColumn.getId() + ", Name: " + backlogColumn.getName());
+
+      System.out.println("Step 6: Creating task object...");
       Task task = new Task();
       task.setTitle(taskRequestDTO.getTitle());
       task.setDescription(taskRequestDTO.getDescription());
       task.setProject(project);
+      task.setColumn(backlogColumn);
       task.setPriority(taskRequestDTO.getPriority());
       task.setDueDate(taskRequestDTO.getDueDate());
       task.setCreatedBy(currentUser);
@@ -333,9 +348,10 @@ public class TaskController {
       System.out.println("  - Priority: " + taskRequestDTO.getPriority());
       System.out.println("  - DueDate: " + taskRequestDTO.getDueDate());
       System.out.println("  - AssignedToId: " + taskRequestDTO.getAssignedToId());
+      System.out.println("  - Column: " + backlogColumn.getName());
 
       if (taskRequestDTO.getAssignedToId() != null) {
-        System.out.println("Step 6: Fetching assigned user...");
+        System.out.println("Step 7: Fetching assigned user...");
         User assignedUser = userService.getUser(taskRequestDTO.getAssignedToId());
         if (assignedUser != null) {
           task.setAssignedTo(assignedUser);
@@ -345,11 +361,11 @@ public class TaskController {
         }
       }
 
-      System.out.println("Step 7: Calling taskService.createTask()...");
+      System.out.println("Step 8: Calling taskService.createTask()...");
       Task createdTask = taskService.createTask(task);
       System.out.println("✓ Task created successfully - ID: " + createdTask.getId());
 
-      System.out.println("Step 8: Converting to response DTO...");
+      System.out.println("Step 9: Converting to response DTO...");
       TaskResponseDTO responseDTO = convertToResponseDTO(createdTask);
       System.out.println("✓ Response DTO created");
       System.out.println("========================================");
