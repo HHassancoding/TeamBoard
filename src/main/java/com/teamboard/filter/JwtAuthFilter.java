@@ -32,6 +32,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+    // Skip JWT validation for CORS preflight requests
+    if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+      logger.debug("Skipping JWT validation for OPTIONS preflight request");
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     try{
       String token = extractToken(request);
       if(token != null && jwtUtil.validateToken(token)){
