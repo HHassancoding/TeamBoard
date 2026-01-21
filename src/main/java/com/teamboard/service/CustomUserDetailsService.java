@@ -3,6 +3,7 @@ package com.teamboard.service;
 import com.teamboard.entity.User;
 import com.teamboard.repository.UserRepo;
 import java.util.Collections;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,10 +23,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     User user = userRepo.findByEmail(username)
         .orElseThrow(() ->
             new UsernameNotFoundException("User not found with username: " + username));
+
+    System.out.println("Loading user: " + user.getEmail() + " with ROLE_USER authority");
+
     return org.springframework.security.core.userdetails.User
         .withUsername(user.getEmail())
         .password(user.getPasswordHash())
-        .authorities(Collections.emptyList())
+        .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")))
         .build();
   }
 }
