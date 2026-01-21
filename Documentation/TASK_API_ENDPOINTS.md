@@ -72,7 +72,7 @@ Authorization: Bearer {token} (required - must be workspace member or owner)
 - Assignee is optional (null means unassigned)
 - Due date is optional
 - User must be either a workspace member or the workspace owner
-- **Note:** The `columnId` field is NOT accepted in the request body. Tasks are automatically created in the Backlog column. To move a task to a different column after creation, use the move endpoint: `PATCH /tasks/{taskId}/column/{columnId}` (see section 6 below).
+- **Note:** The `columnId` field is NOT accepted in the request body. Tasks are automatically created in the Backlog column. To move a task to a different column after creation, use the move endpoint: `PATCH /tasks/{taskId}/column/{columnId}` (see "6. Move Task Between Columns" section below).
 
 **Error Responses:**
 - `400 Bad Request` - Invalid input, title required
