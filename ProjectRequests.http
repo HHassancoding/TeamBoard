@@ -7,7 +7,7 @@ GET https://examples.http-client.intellij.net/get
 @baseUrl = http://localhost:8080/api
 @workspaceId = 8
 @projectId = 4
-@token = Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2ODU3ODQwMSwiZXhwIjoxNzY4NTc5MjY1fQ.NfDUgykqlGhwii9wDgh-W4crvjDjB1UAG9Si-mWqWAs
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2OTExMzI4OSwiZXhwIjoxNzY5MTE0MTUzfQ.mE9N6HkZeb9GKwMo0FkIWVjwue9MwZTah2EjZpDr4iE
 
 ### Register Owner User (will create workspace)
 POST {{baseUrl}}/auth/register
@@ -42,25 +42,25 @@ Authorization: Bearer {{token}}
 
 ### 1. CREATE PROJECT
 POST {{baseUrl}}/workspaces/{{workspaceId}}/projects
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "name": "New Project Test",
+  "name": "New Project Test 3",
   "description": "This is a new project"
 }
 
 ### 2. GET ALL PROJECTS IN WORKSPACE
 GET {{baseUrl}}/workspaces/{{workspaceId}}/projects
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ### 3. GET SINGLE PROJECT
 GET {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ### 4. UPDATE PROJECT
 PUT {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -70,7 +70,7 @@ Content-Type: application/json
 
 ### 5. DELETE PROJECT
 DELETE {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ### ERROR TEST: Missing Authorization Header
 GET {{baseUrl}}/workspaces/{{workspaceId}}/projects
@@ -83,12 +83,12 @@ Content-Type: application/json
 
 ### ERROR TEST: Non-existent Workspace
 GET {{baseUrl}}/workspaces/999/projects
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ### ERROR TEST: Non-existent Project
 GET {{baseUrl}}/workspaces/{{workspaceId}}/projects/999
-Authorization: {{token}}
+Authorization: Bearer {{token}}
 
 ### ERROR TEST: User Not Member of Workspace
 GET {{baseUrl}}/workspaces/2/projects
-Authorization: {{token}}
+Authorization: Bearer {{token}}

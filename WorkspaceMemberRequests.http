@@ -2,7 +2,7 @@
 
 ### Variables
 @baseUrl = http://localhost:8080/api
-@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2NzAzMzczMiwiZXhwIjoxNzY3MDM0NTk2fQ.73kJlt066BQYhb4ZQAyNwV75eOtIN6rJYsq2K8ANfMg
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJvd25lckB0ZXN0LmNvbSIsImlhdCI6MTc2OTExMjI1OCwiZXhwIjoxNzY5MTEzMTIyfQ.JaB5xub6zGrJiwtCfB1xPj5sVJgjllvp2AUOtf2Vk50
 
 ### NOTE: ID MAPPING FOR TESTING
 ### After registering users, note their IDs:
@@ -115,7 +115,7 @@ Authorization: Bearer {{token}}
 ###
 ### Get single workspace by workspaceId
 ### Path: /workspaces/{workspaceId}
-GET {{baseUrl}}/workspaces/4
+GET {{baseUrl}}/workspaces/8
 Authorization: Bearer {{token}}
 
 ###
