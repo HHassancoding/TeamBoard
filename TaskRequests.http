@@ -20,7 +20,22 @@ Content-Type: application/json
 {
   "title": "Implement user authentication",
   "description": "Add JWT token-based authentication to the backend",
-  "assignedTo": {{userId}},
+  "assignedToId": {{userId}},
+  "priority": "HIGH",
+  "dueDate": "2025-01-20T23:59:59Z"
+}
+
+---
+
+### 1_workspace. Create Task via Workspace-scoped Endpoint (RECOMMENDED for frontend)
+POST {{baseUrl}}/workspaces/{{workspaceId}}/projects/{{projectId}}/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Implement user authentication",
+  "description": "Add JWT token-based authentication to the backend",
+  "assignedToId": {{userId}},
   "priority": "HIGH",
   "dueDate": "2025-01-20T23:59:59Z"
 }
@@ -70,30 +85,6 @@ Authorization: Bearer {{token}}
 
 ---
 
-### 2a. Get Tasks in Project - Filter by Column
-GET {{baseUrl}}/projects/{{projectId}}/tasks?columnId={{columnId}}
-Authorization: Bearer {{token}}
-
----
-
-### 2b. Get Tasks in Project - Filter by Assignee
-GET {{baseUrl}}/projects/{{projectId}}/tasks?assignedTo={{userId}}
-Authorization: Bearer {{token}}
-
----
-
-### 2c. Get Tasks in Project - Filter by Priority
-GET {{baseUrl}}/projects/{{projectId}}/tasks?priority=HIGH
-Authorization: Bearer {{token}}
-
----
-
-### 2d. Get Tasks in Project - Filter by Multiple Criteria
-GET {{baseUrl}}/projects/{{projectId}}/tasks?columnId={{columnId}}&priority=HIGH&assignedTo={{userId}}
-Authorization: Bearer {{token}}
-
----
-
 ### 3. Get Single Task Detail
 GET {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{token}}
@@ -108,7 +99,7 @@ Content-Type: application/json
 {
   "title": "Implement user authentication - Updated",
   "description": "Add JWT token-based authentication to the backend with refresh tokens",
-  "assignedTo": {{userId}},
+  "assignedToId": {{userId}},
   "priority": "CRITICAL",
   "dueDate": "2025-01-25T23:59:59Z"
 }
@@ -142,18 +133,18 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "assignedTo": {{userId}}
+  "assignedToId": {{userId}}
 }
 
 ---
 
-### 4d. Update Task - Unassign (set assignedTo to null)
+### 4d. Update Task - Unassign (set assignedToId to null)
 PUT {{baseUrl}}/tasks/{{taskId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "assignedTo": null
+  "assignedToId": null
 }
 
 ---
