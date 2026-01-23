@@ -25,10 +25,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/workspaces")
 public class WorkspaceController {
+  private static final Logger log = LoggerFactory.getLogger(WorkspaceController.class);
   private final WorkspaceService workspaceService;
   private final WorkspaceMemberService workspaceMemberService;
   private final JwtUtil jwtUtil;
@@ -104,13 +107,22 @@ public class WorkspaceController {
   }
 
   /**
-   * Get all workspaces (basic list; later will filter by membership).
+   * Get all workspaces visible to the authenticated user (owner or member).
    * GET /api/workspaces
    */
   @GetMapping
-  public ResponseEntity<?> getAllWorkspaces() {
+  public ResponseEntity<?> getAllWorkspaces(@RequestHeader(value = "Authorization") String bearerToken) {
     try {
-      List<Workspace> workspaces = workspaceService.getAllWorkspaces();
+      // Extract JWT and resolve current user
+      String token = bearerToken.substring(7);
+      String email = jwtUtil.extractUsername(token);
+      User currentUser = userImp.findByEmail(email);
+
+      if (currentUser == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+      }
+
+      List<Workspace> workspaces = workspaceService.getWorkspacesForUser(currentUser.getId());
       List<WorkspaceResponseDTO> responseDTOs =
           workspaces.stream().map(this::convertToResponseDTO).collect(Collectors.toList());
       return ResponseEntity.ok(responseDTOs);
@@ -312,12 +324,10 @@ public class WorkspaceController {
 
       return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     } catch (IllegalArgumentException e) {
-      System.out.println("❌ IllegalArgumentException: " + e.getMessage());
-      e.printStackTrace();
+      log.warn("IllegalArgumentException in addMemberToWorkspace: {}", e.getMessage(), e);
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (Exception e) {
-      System.out.println("❌ Exception: " + e.getMessage());
-      e.printStackTrace();
+      log.error("Failed to add member", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to add member: " + e.getMessage());
     }

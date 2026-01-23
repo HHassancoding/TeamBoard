@@ -324,5 +324,34 @@ public class WorkspaceImpTests {
     assertTrue(result.isEmpty());
     verify(workspaceRepository).findByNameContainingIgnoreCase("NonExistent");
   }
-}
 
+  // ==================== getWorkspacesForUser Tests ====================
+
+  @Test
+  public void getWorkspacesForUserTest() {
+    // Arrange
+    when(workspaceRepository.findAllAccessibleByUser(1L)).thenReturn(workspaceList);
+
+    // Act
+    List<Workspace> result = workspaceImp.getWorkspacesForUser(1L);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    verify(workspaceRepository).findAllAccessibleByUser(1L);
+  }
+
+  @Test
+  public void getWorkspacesForUserEmptyTest() {
+    // Arrange
+    when(workspaceRepository.findAllAccessibleByUser(2L)).thenReturn(Collections.emptyList());
+
+    // Act
+    List<Workspace> result = workspaceImp.getWorkspacesForUser(2L);
+
+    // Assert
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(workspaceRepository).findAllAccessibleByUser(2L);
+  }
+}

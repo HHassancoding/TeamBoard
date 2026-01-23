@@ -76,5 +76,10 @@ public class WorkspaceImp implements WorkspaceService {
   public List<Workspace> searchWorkspacesByName(String name) {
     return workspaceRepository.findByNameContainingIgnoreCase(name);
   }
-}
 
+  // New: workspaces owned by or shared with the user
+  @Override
+  public List<Workspace> getWorkspacesForUser(Long userId) {
+    return workspaceRepository.findAllAccessibleByUser(userId);
+  }
+}
