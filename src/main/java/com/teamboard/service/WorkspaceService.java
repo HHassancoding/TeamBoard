@@ -19,5 +19,6 @@ public interface WorkspaceService {
   Workspace findByOwnerIdAndName(Long ownerId, String name);
 
   List<Workspace> searchWorkspacesByName(String name);
-}
 
+  List<Workspace> getWorkspacesForUser(Long userId);
+}
